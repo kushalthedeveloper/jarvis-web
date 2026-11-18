@@ -85,9 +85,9 @@
 <div class="container">
   <div id="authSection" class="card" style="max-width:440px; margin: 40px auto;">
     <h2>CONNECT WITH USERNAME & PASSWORD</h2>
-    <p style="color:var(--muted); font-size:14px;">No email required. Use the exact same Username & Password on Web and Desktop JARVIS to link them live.</p>
-    <input type="text" id="usernameInput" placeholder="Username (e.g., kushal)" autocomplete="username" />
-    <input type="password" id="passwordInput" placeholder="Password (min 6 chars)" autocomplete="current-password" />
+    <p style="color:var(--muted); font-size:14px;">Zero emails. Zero confirmations. Use the exact same Username & Password on Web and Desktop JARVIS to link them live.</p>
+    <input type="text" id="usernameInput" placeholder="Username (e.g., kushi)" autocomplete="username" />
+    <input type="password" id="passwordInput" placeholder="Password (min 4 chars)" autocomplete="current-password" />
     <div style="display:flex; gap:10px;">
       <button onclick="login()" style="flex:1;">LOGIN</button>
       <button class="secondary" onclick="signup()" style="flex:1;">CREATE ACCOUNT</button>
@@ -179,67 +179,95 @@
   const SUPABASE_KEY = "sb_publishable_6vpris-KE1NpaguLqvt6zw_l5OnvrsE";
 
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  let currentUser = null;
-  let currentUsername = "";
+  let currentAccount = null;
 
-  function usernameToInternalEmail(rawUser) {
-    const clean = rawUser.trim().toLowerCase().replace(/[^a-z0-9._-]/g, "");
-    return clean ? `${clean}@jarvis.local` : "";
+  function cleanUsername(raw) {
+    return raw.trim().toLowerCase().replace(/[^a-z0-9._-]/g, "");
+  }
+
+  async function hashCredentials(username, password) {
+    const enc = new TextEncoder().encode(`JARVIS_100L::${username}::${password}`);
+    const digest = await crypto.subtle.digest("SHA-256", enc);
+    return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, "0")).join("");
   }
 
   async function init() {
-    const { data: { session } } = await sb.auth.getSession();
-    if (session) {
-      currentUser = session.user;
-      currentUsername = (currentUser.email || "").split("@")[0];
-      showDashboard();
+    const saved = localStorage.getItem("jarvis_account_session");
+    if (saved) {
+      try {
+        currentAccount = JSON.parse(saved);
+        if (currentAccount && currentAccount.id) {
+          showDashboard();
+        }
+      } catch (e) {}
     }
   }
 
   async function signup() {
-    const rawUser = document.getElementById("usernameInput").value.trim();
+    const username = cleanUsername(document.getElementById("usernameInput").value);
     const password = document.getElementById("passwordInput").value.trim();
-    const internalEmail = usernameToInternalEmail(rawUser);
-    if (!internalEmail || password.length < 6) {
-      document.getElementById("authMsg").innerText = "Enter a valid username and password (min 6 chars).";
+    const msgEl = document.getElementById("authMsg");
+    if (!username || password.length < 4) {
+      msgEl.innerText = "Enter a valid username and password (min 4 chars).";
       return;
     }
-    const { data, error } = await sb.auth.signUp({
-      email: internalEmail,
-      password,
-      options: { data: { username: rawUser.toLowerCase() } }
-    });
-    if (error) {
-      document.getElementById("authMsg").innerText = error.message;
-    } else if (data.session) {
-      currentUser = data.user;
-      currentUsername = rawUser.toLowerCase();
-      showDashboard();
-    } else {
-      await login();
+    msgEl.innerText = "Creating account...";
+    const password_hash = await hashCredentials(username, password);
+
+    const { data: existing } = await sb.from("jarvis_accounts").select("id").eq("username", username).maybeSingle();
+    if (existing) {
+      msgEl.innerText = "Username already exists. Click LOGIN instead.";
+      return;
     }
+
+    const { data, error } = await sb
+      .from("jarvis_accounts")
+      .insert({ username, password_hash, assistant_name: "JARVIS", active_mode: "GOD" })
+      .select()
+      .single();
+
+    if (error) {
+      msgEl.innerText = error.message;
+      return;
+    }
+    currentAccount = data;
+    localStorage.setItem("jarvis_account_session", JSON.stringify(currentAccount));
+    showDashboard();
   }
 
   async function login() {
-    const rawUser = document.getElementById("usernameInput").value.trim();
+    const username = cleanUsername(document.getElementById("usernameInput").value);
     const password = document.getElementById("passwordInput").value.trim();
-    const internalEmail = usernameToInternalEmail(rawUser);
-    if (!internalEmail || !password) {
-      document.getElementById("authMsg").innerText = "Enter your username and password.";
+    const msgEl = document.getElementById("authMsg");
+    if (!username || !password) {
+      msgEl.innerText = "Enter your username and password.";
       return;
     }
-    const { data, error } = await sb.auth.signInWithPassword({ email: internalEmail, password });
+    msgEl.innerText = "Authenticating...";
+    const password_hash = await hashCredentials(username, password);
+
+    const { data, error } = await sb
+      .from("jarvis_accounts")
+      .select("*")
+      .eq("username", username)
+      .eq("password_hash", password_hash)
+      .maybeSingle();
+
     if (error) {
-      document.getElementById("authMsg").innerText = error.message;
-    } else {
-      currentUser = data.user;
-      currentUsername = rawUser.toLowerCase();
-      showDashboard();
+      msgEl.innerText = error.message;
+      return;
     }
+    if (!data) {
+      msgEl.innerText = "Invalid username or password. Click CREATE ACCOUNT if you are new.";
+      return;
+    }
+    currentAccount = data;
+    localStorage.setItem("jarvis_account_session", JSON.stringify(currentAccount));
+    showDashboard();
   }
 
-  async function logout() {
-    await sb.auth.signOut();
+  function logout() {
+    localStorage.removeItem("jarvis_account_session");
     location.reload();
   }
 
@@ -247,29 +275,32 @@
     document.getElementById("authSection").classList.add("hidden");
     document.getElementById("dashboardSection").classList.remove("hidden");
     document.getElementById("logoutBtn").classList.remove("hidden");
-    document.getElementById("loggedUserLabel").innerText = currentUsername;
+    document.getElementById("loggedUserLabel").innerText = currentAccount.username;
 
-    const { data } = await sb.from("jarvis_users").select("*").eq("id", currentUser.id).maybeSingle();
+    const { data } = await sb.from("jarvis_accounts").select("*").eq("id", currentAccount.id).maybeSingle();
     if (data) {
+      currentAccount = data;
+      localStorage.setItem("jarvis_account_session", JSON.stringify(currentAccount));
       document.getElementById("assistantNameInput").value = data.assistant_name || "JARVIS";
       document.getElementById("headerTitle").innerText = `${(data.assistant_name || "JARVIS").toUpperCase()} // GLOBAL COMMAND CENTER`;
       document.getElementById("modeStatus").innerText = `Active Mode: ${data.active_mode || "GOD"} MODE`;
     }
 
     loadRemoteFeed();
+    setInterval(loadRemoteFeed, 5000);
     sb.channel("remote-sync")
-      .on("postgres_changes", { event: "*", schema: "public", table: "remote_commands", filter: `user_id=eq.${currentUser.id}` }, () => loadRemoteFeed())
+      .on("postgres_changes", { event: "*", schema: "public", table: "remote_commands", filter: `user_id=eq.${currentAccount.id}` }, () => loadRemoteFeed())
       .subscribe();
   }
 
   async function setMode(mode) {
-    await sb.from("jarvis_users").upsert({ id: currentUser.id, active_mode: mode });
+    await sb.from("jarvis_accounts").update({ active_mode: mode }).eq("id", currentAccount.id);
     document.getElementById("modeStatus").innerText = `Active Mode: ${mode} MODE`;
   }
 
   async function saveAssistantName() {
     const name = document.getElementById("assistantNameInput").value.trim() || "JARVIS";
-    await sb.from("jarvis_users").upsert({ id: currentUser.id, assistant_name: name });
+    await sb.from("jarvis_accounts").update({ assistant_name: name }).eq("id", currentAccount.id);
     document.getElementById("headerTitle").innerText = `${name.toUpperCase()} // GLOBAL COMMAND CENTER`;
     alert(`Assistant renamed to ${name}!`);
   }
@@ -278,7 +309,7 @@
     const target_device = document.getElementById("targetDevice").value;
     const command_text = customCmd || document.getElementById("remoteCmdInput").value.trim();
     if (!command_text) return;
-    await sb.from("remote_commands").insert({ user_id: currentUser.id, target_device, command_text, status: "pending" });
+    await sb.from("remote_commands").insert({ user_id: currentAccount.id, target_device, command_text, status: "pending" });
     document.getElementById("remoteCmdInput").value = "";
     loadRemoteFeed();
   }
@@ -288,7 +319,8 @@
   }
 
   async function loadRemoteFeed() {
-    const { data } = await sb.from("remote_commands").select("*").eq("user_id", currentUser.id).order("created_at", { ascending: false }).limit(8);
+    if (!currentAccount) return;
+    const { data } = await sb.from("remote_commands").select("*").eq("user_id", currentAccount.id).order("created_at", { ascending: false }).limit(8);
     const feed = document.getElementById("remoteFeed");
     feed.innerHTML = (data || []).map(item => `
       <div class="log-item">
@@ -353,7 +385,7 @@
 
   async function saveMatchProfile() {
     const payload = {
-      user_id: currentUser.id,
+      user_id: currentAccount.id,
       display_name: document.getElementById("matchName").value.trim(),
       age: parseInt(document.getElementById("matchAge").value, 10),
       city: document.getElementById("matchCity").value.trim(),
@@ -364,7 +396,7 @@
     const { error } = await sb.from("companion_profiles").upsert(payload);
     if (error) { alert(error.message); return; }
 
-    const { data } = await sb.from("companion_profiles").select("*").eq("looking_for_match", true).neq("user_id", currentUser.id).limit(10);
+    const { data } = await sb.from("companion_profiles").select("*").eq("looking_for_match", true).neq("user_id", currentAccount.id).limit(10);
     const list = document.getElementById("matchesList");
     list.innerHTML = (data && data.length)
       ? data.map(p => `<div class="log-item"><strong>${p.display_name} (${p.age})</strong> — ${p.city}<br/>Interests: ${p.interests}<br/>Social: <span style="color:#38bdf8;">${p.social_links?.handle || "Connected"}</span></div>`).join("")
