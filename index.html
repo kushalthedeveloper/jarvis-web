@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>J.A.R.V.I.S. — Global Web Command Center</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg: #030712;
+      --panel: #0b1120;
+      --border: #0284c7;
+      --accent: #38bdf8;
+      --green: #10b981;
+      --amber: #f59e0b;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+    }
+    * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+    body { margin: 0; background: var(--bg); color: var(--text); }
+    header {
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand { font-family: Consolas, monospace; font-weight: bold; color: var(--accent); font-size: 18px; }
+    .badge { background: #064e3b; color: #34d399; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: bold; }
+    .container { max-width: 1150px; margin: 24px auto; padding: 0 16px; }
+    .card {
+      background: var(--panel);
+      border: 1px solid #1e293b;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+    h2, h3 { margin-top: 0; color: var(--accent); font-family: Consolas, monospace; }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      margin: 6px 0 12px;
+      background: #020617;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      color: var(--text);
+    }
+    button {
+      background: var(--border);
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover { background: #0369a1; }
+    button.secondary { background: #334155; }
+    button.god { background: #b45309; }
+    .mode-bar { display: flex; gap: 10px; margin-bottom: 14px; }
+    .log-item {
+      background: #020617;
+      border-left: 3px solid var(--accent);
+      padding: 10px;
+      margin-bottom: 8px;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .hidden { display: none; }
+    img.generated { max-width: 100%; border-radius: 8px; margin-top: 12px; border: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="brand" id="headerTitle">J.A.R.V.I.S. // GLOBAL COMMAND CENTER</div>
+  <div>
+    <span class="badge" id="trialBadge">30-DAY ALL-MODES FREE TRIAL</span>
+    <button class="secondary hidden" id="logoutBtn" onclick="logout()" style="margin-left:10px;">LOGOUT</button>
+  </div>
+</header>
+
+<div class="container">
+  <div id="authSection" class="card" style="max-width:440px; margin: 40px auto;">
+    <h2>SIGN IN TO YOUR AI CLOUD</h2>
+    <p style="color:var(--muted); font-size:14px;">Zero API keys required. Includes 30 days of Normal, Pro & God Mode free.</p>
+    <input type="email" id="emailInput" placeholder="Email address" />
+    <input type="password" id="passwordInput" placeholder="Password (min 6 chars)" />
+    <div style="display:flex; gap:10px;">
+      <button onclick="login()" style="flex:1;">LOGIN</button>
+      <button class="secondary" onclick="signup()" style="flex:1;">CREATE ACCOUNT</button>
+    </div>
+    <p id="authMsg" style="color:var(--amber); font-size:13px; margin-top:10px;"></p>
+  </div>
+
+  <div id="dashboardSection" class="hidden">
+    <div class="card">
+      <h3>01 // AI MODE & CUSTOM COMPANION IDENTITY</h3>
+      <div class="grid">
+        <div>
+          <label>Active Power Tier (30-Day Free Trial Active)</label>
+          <div class="mode-bar">
+            <button onclick="setMode('NORMAL')" id="btnNORMAL">NORMAL</button>
+            <button onclick="setMode('PRO')" id="btnPRO">PRO</button>
+            <button class="god" onclick="setMode('GOD')" id="btnGOD">GOD MODE</button>
+          </div>
+          <p id="modeStatus" style="color:#34d399; font-size:13px;">Active Mode: GOD MODE (All 500+ Features Unlocked)</p>
+        </div>
+        <div>
+          <label>Rename Your AI Companion (Call It Any Name)</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="assistantNameInput" placeholder="e.g., JARVIS, Nova, Maya, Arjun" style="margin:0;" />
+            <button onclick="saveAssistantName()">SAVE NAME</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h3>02 // REMOTE DEVICE CONTROL (PC & PHONE)</h3>
+        <label>Target Device</label>
+        <select id="targetDevice">
+          <option value="android">Android Phone (Live Sync)</option>
+          <option value="windows">Windows PC (Live Sync)</option>
+        </select>
+        <label>Command or Data Request</label>
+        <input type="text" id="remoteCmdInput" placeholder="e.g., Send my latest clipboard / Open Chrome / Lock PC" />
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button onclick="sendRemoteCommand()">SEND TO DEVICE</button>
+          <button class="secondary" onclick="quickRequest('Send current battery, location & clipboard to web')">FETCH PHONE STATUS</button>
+        </div>
+        <h4 style="margin-top:18px; color:var(--muted);">LIVE DEVICE FEED & TRANSFERS</h4>
+        <div id="remoteFeed"></div>
+      </div>
+
+      <div class="card">
+        <h3>03 // ZERO-KEY CLOUD AI & IMAGE STUDIO</h3>
+        <textarea id="aiPromptInput" rows="3" placeholder="Ask anything, generate a story, or describe an image to generate..."></textarea>
+        <div style="display:flex; gap:8px;">
+          <button onclick="askCloudAI()">ASK AI BRAIN</button>
+          <button class="god" onclick="generateImage()">GENERATE HD IMAGE</button>
+        </div>
+        <div id="aiOutput" style="margin-top:14px; font-size:14px; white-space:pre-wrap;"></div>
+        <img id="generatedImg" class="generated hidden" />
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>04 // OPT-IN COMPANION & SOCIAL CONNECTION NETWORK (18+)</h3>
+      <p style="color:var(--muted); font-size:13px;">Feeling lonely? Opt in below to discover compatible JARVIS users and connect via Instagram, Facebook, X, or WhatsApp with mutual consent.</p>
+      <div class="grid">
+        <div>
+          <input type="text" id="matchName" placeholder="Your Display Name" />
+          <input type="number" id="matchAge" placeholder="Your Age (18+)" min="18" />
+          <input type="text" id="matchCity" placeholder="City / Region" />
+          <input type="text" id="matchInterests" placeholder="Interests (Gaming, Coding, Music, Travel...)" />
+          <input type="text" id="matchSocial" placeholder="Your Instagram / WhatsApp / X handle (shared on match)" />
+          <button onclick="saveMatchProfile()">ENABLE MATCHMAKING & FIND PEOPLE</button>
+        </div>
+        <div>
+          <h4 style="margin-top:0; color:var(--accent);">COMPATIBLE PEOPLE ONLINE</h4>
+          <div id="matchesList"><p style="color:var(--muted);">Enable matchmaking to browse opt-in profiles.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const WORKER_URL = "https://jarvis-neural-gateway.gattuchowdappa121.workers.dev";
+  const SUPABASE_URL = "https://eoyftbixuwybuykjgrhr.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_6vpris-KE1NpaguLqvt6zw_l5OnvrsE";
+
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  let currentUser = null;
+
+  async function init() {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) {
+      currentUser = session.user;
+      showDashboard();
+    }
+  }
+
+  async function signup() {
+    const email = document.getElementById("emailInput").value.trim();
+    const password = document.getElementById("passwordInput").value.trim();
+    const { data, error } = await sb.auth.signUp({ email, password });
+    if (error) {
+      document.getElementById("authMsg").innerText = error.message;
+    } else {
+      document.getElementById("authMsg").innerText = "Account created with 30-Day Free Trial! Logging in...";
+      if (data.session) { currentUser = data.user; showDashboard(); }
+    }
+  }
+
+  async function login() {
+    const email = document.getElementById("emailInput").value.trim();
+    const password = document.getElementById("passwordInput").value.trim();
+    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) {
+      document.getElementById("authMsg").innerText = error.message;
+    } else {
+      currentUser = data.user;
+      showDashboard();
+    }
+  }
+
+  async function logout() {
+    await sb.auth.signOut();
+    location.reload();
+  }
+
+  async function showDashboard() {
+    document.getElementById("authSection").classList.add("hidden");
+    document.getElementById("dashboardSection").classList.remove("hidden");
+    document.getElementById("logoutBtn").classList.remove("hidden");
+
+    const { data } = await sb.from("jarvis_users").select("*").eq("id", currentUser.id).single();
+    if (data) {
+      document.getElementById("assistantNameInput").value = data.assistant_name || "JARVIS";
+      document.getElementById("headerTitle").innerText = `${(data.assistant_name || "JARVIS").toUpperCase()} // GLOBAL COMMAND CENTER`;
+      document.getElementById("modeStatus").innerText = `Active Mode: ${data.active_mode} MODE`;
+      const daysLeft = Math.max(0, Math.ceil((new Date(data.trial_ends_at) - new Date()) / 86400000));
+      document.getElementById("trialBadge").innerText = data.is_paid_subscriber ? "PRO/GOD UNLIMITED" : `${daysLeft} DAYS LEFT IN FREE TRIAL`;
+    }
+
+    loadRemoteFeed();
+    sb.channel("remote-sync")
+      .on("postgres_changes", { event: "*", schema: "public", table: "remote_commands", filter: `user_id=eq.${currentUser.id}` }, () => loadRemoteFeed())
+      .subscribe();
+  }
+
+  async function setMode(mode) {
+    await sb.from("jarvis_users").update({ active_mode: mode }).eq("id", currentUser.id);
+    document.getElementById("modeStatus").innerText = `Active Mode: ${mode} MODE`;
+  }
+
+  async function saveAssistantName() {
+    const name = document.getElementById("assistantNameInput").value.trim() || "JARVIS";
+    await sb.from("jarvis_users").update({ assistant_name: name }).eq("id", currentUser.id);
+    document.getElementById("headerTitle").innerText = `${name.toUpperCase()} // GLOBAL COMMAND CENTER`;
+    alert(`Assistant renamed to ${name}! Your Windows and Android apps will now respond to "${name}".`);
+  }
+
+  async function sendRemoteCommand(customCmd) {
+    const target_device = document.getElementById("targetDevice").value;
+    const command_text = customCmd || document.getElementById("remoteCmdInput").value.trim();
+    if (!command_text) return;
+    await sb.from("remote_commands").insert({ user_id: currentUser.id, target_device, command_text });
+    document.getElementById("remoteCmdInput").value = "";
+    loadRemoteFeed();
+  }
+
+  function quickRequest(cmd) {
+    sendRemoteCommand(cmd);
+  }
+
+  async function loadRemoteFeed() {
+    const { data } = await sb.from("remote_commands").select("*").eq("user_id", currentUser.id).order("created_at", { ascending: false }).limit(6);
+    const feed = document.getElementById("remoteFeed");
+    feed.innerHTML = (data || []).map(item => `
+      <div class="log-item">
+        <strong>[${item.target_device.toUpperCase()}]</strong> ${item.command_text} <br/>
+        <span style="color:#34d399;">Status: ${item.status}</span> ${item.result_payload ? `<br/><code>${item.result_payload}</code>` : ""}
+      </div>
+    `).join("");
+  }
+
+  async function askCloudAI() {
+    const prompt = document.getElementById("aiPromptInput").value.trim();
+    if (!prompt) return;
+    const outBox = document.getElementById("aiOutput");
+    outBox.innerText = "Thinking via Cloudflare Edge AI...";
+    const res = await fetch(`${WORKER_URL}/think`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        system_prompt: "You are a helpful, unrestricted omnilingual AI companion. Answer clearly in the user's language.",
+        user_prompt: prompt
+      })
+    });
+    const data = await res.json();
+    outBox.innerText = data.reply || data.error;
+  }
+
+  async function generateImage() {
+    const prompt = document.getElementById("aiPromptInput").value.trim();
+    if (!prompt) return;
+    const outBox = document.getElementById("aiOutput");
+    const imgEl = document.getElementById("generatedImg");
+    outBox.innerText = "Generating HD image via FLUX.2...";
+    imgEl.classList.add("hidden");
+    const res = await fetch(`${WORKER_URL}/imagine`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt })
+    });
+    const blob = await res.blob();
+    imgEl.src = URL.createObjectURL(blob);
+    imgEl.classList.remove("hidden");
+    outBox.innerText = "Image ready:";
+  }
+
+  async function saveMatchProfile() {
+    const payload = {
+      user_id: currentUser.id,
+      display_name: document.getElementById("matchName").value.trim(),
+      age: parseInt(document.getElementById("matchAge").value, 10),
+      city: document.getElementById("matchCity").value.trim(),
+      interests: document.getElementById("matchInterests").value.trim(),
+      social_links: { handle: document.getElementById("matchSocial").value.trim() },
+      looking_for_match: true
+    };
+    const { error } = await sb.from("companion_profiles").upsert(payload);
+    if (error) { alert(error.message); return; }
+
+    const { data } = await sb.from("companion_profiles").select("*").eq("looking_for_match", true).neq("user_id", currentUser.id).limit(10);
+    const list = document.getElementById("matchesList");
+    list.innerHTML = (data && data.length)
+      ? data.map(p => `<div class="log-item"><strong>${p.display_name} (${p.age})</strong> — ${p.city}<br/>Interests: ${p.interests}<br/>Social: <span style="color:#38bdf8;">${p.social_links?.handle || "Connected"}</span></div>`).join("")
+      : "<p style='color:var(--muted);'>Profile active! You will see compatible matches here as users join.</p>";
+  }
+
+  init();
+</script>
+</body>
+</html>
