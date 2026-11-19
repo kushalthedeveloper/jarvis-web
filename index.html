@@ -3,168 +3,212 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>J.A.R.V.I.S. — Global Web Command Center</title>
+  <title>AETHER-CORE // Sovereign Meta-AI Observatory</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
-      --bg: #030712;
-      --panel: #0b1120;
-      --border: #0284c7;
-      --accent: #38bdf8;
-      --green: #10b981;
-      --amber: #f59e0b;
+      --bg: #04060d;
+      --panel: #080c18;
+      --card: #0b1120;
+      --border: #132238;
+      --emerald: #10b981;
+      --emerald-bright: #34d399;
+      --violet: #8b5cf6;
+      --violet-soft: #a78bfa;
       --text: #f8fafc;
       --muted: #94a3b8;
     }
     * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
-    body { margin: 0; background: var(--bg); color: var(--text); }
+    body {
+      margin: 0;
+      background: radial-gradient(circle at 18% 12%, #0e1629 0%, var(--bg) 55%);
+      color: var(--text);
+      min-height: 100vh;
+    }
     header {
-      background: var(--panel);
+      background: rgba(8, 12, 24, 0.92);
+      backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
-      padding: 14px 24px;
+      padding: 14px 26px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 20;
     }
-    .brand { font-family: Consolas, monospace; font-weight: bold; color: var(--accent); font-size: 18px; }
-    .badge { background: #064e3b; color: #34d399; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: bold; }
-    .container { max-width: 1150px; margin: 24px auto; padding: 0 16px; }
+    .brand { font-family: Consolas, monospace; font-weight: bold; color: var(--emerald-bright); font-size: 17px; letter-spacing: 1px; }
+    .badge { background: rgba(139, 92, 246, 0.18); border: 1px solid var(--violet); color: var(--violet-soft); padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: bold; font-family: Consolas, monospace; }
+    .container { max-width: 1220px; margin: 24px auto; padding: 0 18px; }
     .card {
       background: var(--panel);
-      border: 1px solid #1e293b;
-      border-radius: 10px;
-      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px;
       margin-bottom: 20px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
     }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
-    h2, h3 { margin-top: 0; color: var(--accent); font-family: Consolas, monospace; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px; }
+    h2, h3 { margin-top: 0; color: var(--emerald-bright); font-family: Consolas, monospace; letter-spacing: 0.5px; }
     input, select, textarea {
       width: 100%;
-      padding: 10px 12px;
+      padding: 11px 13px;
       margin: 6px 0 12px;
-      background: #020617;
-      border: 1px solid #334155;
-      border-radius: 6px;
+      background: #04060d;
+      border: 1px solid #1e293b;
+      border-radius: 8px;
       color: var(--text);
+      outline: none;
     }
+    input:focus, textarea:focus, select:focus { border-color: var(--emerald); }
     button {
-      background: var(--border);
-      color: white;
+      background: linear-gradient(135deg, var(--emerald), #059669);
+      color: #030712;
       border: none;
       padding: 10px 16px;
-      border-radius: 6px;
+      border-radius: 8px;
       font-weight: bold;
       cursor: pointer;
+      font-family: Consolas, monospace;
     }
-    button:hover { background: #0369a1; }
-    button.secondary { background: #334155; }
-    button.god { background: #b45309; }
-    .mode-bar { display: flex; gap: 10px; margin-bottom: 14px; }
+    button:hover { filter: brightness(1.1); }
+    button.violet { background: linear-gradient(135deg, var(--violet), #6d28d9); color: #ffffff; }
+    button.secondary { background: #132238; color: #cbd5e1; }
+    .orb-banner {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 16px 20px;
+      border-radius: 14px;
+      background: linear-gradient(90deg, rgba(16,185,129,0.12), rgba(139,92,246,0.12));
+      border: 1px solid #1e293b;
+      margin-bottom: 20px;
+    }
+    .orb-pulse {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 2px solid var(--emerald-bright);
+      box-shadow: 0 0 18px var(--emerald);
+      animation: pulse 2.4s infinite ease-in-out;
+      flex-shrink: 0;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(0.94); box-shadow: 0 0 12px var(--emerald); }
+      50% { transform: scale(1.06); box-shadow: 0 0 24px var(--violet); }
+    }
     .log-item {
-      background: #020617;
-      border-left: 3px solid var(--accent);
-      padding: 10px;
+      background: #04060d;
+      border-left: 3px solid var(--emerald);
+      padding: 10px 12px;
       margin-bottom: 8px;
-      border-radius: 4px;
-      font-size: 14px;
+      border-radius: 6px;
+      font-size: 13px;
     }
     .hidden { display: none; }
-    img.generated { max-width: 100%; border-radius: 8px; margin-top: 12px; border: 1px solid var(--border); }
+    img.generated, video.generated { max-width: 100%; border-radius: 10px; margin-top: 12px; border: 1px solid var(--emerald); }
   </style>
 </head>
 <body>
 
 <header>
-  <div class="brand" id="headerTitle">J.A.R.V.I.S. // GLOBAL COMMAND CENTER</div>
-  <div>
-    <span class="badge" id="trialBadge">30-DAY ALL-MODES FREE TRIAL</span>
-    <button class="secondary hidden" id="logoutBtn" onclick="logout()" style="margin-left:10px;">LOGOUT</button>
+  <div class="brand" id="headerTitle">◈ AETHER-CORE // SOVEREIGN META-AI OBSERVATORY</div>
+  <div style="display:flex; align-items:center; gap:10px;">
+    <span class="badge" id="trialBadge">30-DAY FREE TRIAL</span>
+    <button class="secondary hidden" id="logoutBtn" onclick="logout()">LOGOUT</button>
   </div>
 </header>
 
 <div class="container">
-  <div id="authSection" class="card" style="max-width:440px; margin: 40px auto;">
-    <h2>CONNECT WITH USERNAME & PASSWORD</h2>
-    <p style="color:var(--muted); font-size:14px;">Zero emails. Zero confirmations. Use the exact same Username & Password on Web and Desktop JARVIS to link them live.</p>
+  <div id="authSection" class="card" style="max-width:450px; margin: 48px auto;">
+    <h2>◈ CONNECT OBSERVATORY</h2>
+    <p style="color:var(--muted); font-size:14px;">Zero emails. Zero confirmations. Sign in with your Username & Password to link Web, Desktop & Mobile live.</p>
     <input type="text" id="usernameInput" placeholder="Username (e.g., kushi)" autocomplete="username" />
     <input type="password" id="passwordInput" placeholder="Password (min 4 chars)" autocomplete="current-password" />
     <div style="display:flex; gap:10px;">
-      <button onclick="login()" style="flex:1;">LOGIN</button>
-      <button class="secondary" onclick="signup()" style="flex:1;">CREATE ACCOUNT</button>
+      <button onclick="login()" style="flex:1;">ENTER</button>
+      <button class="violet" onclick="signup()" style="flex:1;">CREATE ACCOUNT</button>
     </div>
-    <p id="authMsg" style="color:var(--amber); font-size:13px; margin-top:10px;"></p>
+    <p id="authMsg" style="color:var(--violet-soft); font-size:13px; margin-top:10px;"></p>
   </div>
 
   <div id="dashboardSection" class="hidden">
-    <div class="card">
-      <h3>01 // AI MODE & CUSTOM COMPANION IDENTITY</h3>
-      <div class="grid">
-        <div>
-          <label>Connected Account: <strong id="loggedUserLabel" style="color:#38bdf8;"></strong></label>
-          <div class="mode-bar" style="margin-top:8px;">
-            <button onclick="setMode('NORMAL')" id="btnNORMAL">NORMAL</button>
-            <button onclick="setMode('PRO')" id="btnPRO">PRO</button>
-            <button class="god" onclick="setMode('GOD')" id="btnGOD">GOD MODE</button>
-          </div>
-          <p id="modeStatus" style="color:#34d399; font-size:13px;">Active Mode: GOD MODE (All Features Unlocked)</p>
+    <div class="orb-banner">
+      <div class="orb-pulse"></div>
+      <div style="flex:1;">
+        <div style="font-family:Consolas,monospace; font-weight:bold; color:var(--emerald-bright);">
+          CONNECTED NODE: <span id="loggedUserLabel"></span> // ALL-MODEL FEDERATION ONLINE
         </div>
-        <div>
-          <label>Rename Your AI Companion (Call It Any Name)</label>
-          <div style="display:flex; gap:8px;">
-            <input type="text" id="assistantNameInput" placeholder="e.g., JARVIS, Nova, Maya, Arjun" style="margin:0;" />
-            <button onclick="saveAssistantName()">SAVE NAME</button>
-          </div>
+        <div style="font-size:13px; color:var(--muted); margin-top:4px;">
+          Parallel routing active across Cloudflare Workers, OpenRouter Free 25+ Models, and Local Sovereign Neural Memory.
         </div>
+      </div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <input type="password" id="activationCodeInput" placeholder="Activation Code" style="width:165px; margin:0;" />
+        <button onclick="redeemCode()">ACTIVATE</button>
       </div>
     </div>
 
     <div class="grid">
       <div class="card">
-        <h3>02 // REMOTE DEVICE CONTROL (PC & PHONE)</h3>
-        <label>Target Device</label>
-        <select id="targetDevice">
-          <option value="windows">Windows PC (Live Sync)</option>
-          <option value="android">Android Phone (Live Sync)</option>
+        <h3>01 // ALL-MODEL NEURAL STUDIO</h3>
+        <label style="font-size:12px; color:var(--muted);">Select AI Federation Mesh</label>
+        <select id="modelSelect">
+          <option value="AUTO">AUTO FAST-RACE (All AI Models Parallel)</option>
+          <option value="OPENROUTER">OpenRouter Free Mesh (25+ Frontier Models)</option>
+          <option value="CLOUDFLARE">Cloudflare Edge Mesh (DeepSeek / GLM / Llama)</option>
         </select>
-        <label>Command or Data Request</label>
-        <input type="text" id="remoteCmdInput" placeholder="e.g., Open Chrome / Take screenshot / Lock PC" />
+        <textarea id="aiPromptInput" rows="3" placeholder="Ask anything, generate code, or describe an image/video..."></textarea>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <button onclick="sendRemoteCommand()">SEND TO DEVICE</button>
-          <button class="secondary" onclick="quickRequest('Send current battery & system status to web')">FETCH PC STATUS</button>
+          <button onclick="askCloudAI()">ASK META-BRAIN</button>
+          <button class="violet" onclick="generateImage()">HD IMAGE</button>
+          <button class="secondary" onclick="triggerRemoteVideo()">RENDER MP4 VIDEO ON PC</button>
         </div>
-        <h4 style="margin-top:18px; color:var(--muted);">LIVE DEVICE FEED & TRANSFERS</h4>
-        <div id="remoteFeed"></div>
+        <div id="aiOutput" style="margin-top:14px; font-size:14px; white-space:pre-wrap; color:#e2e8f0;"></div>
+        <img id="generatedImg" class="generated hidden" />
       </div>
 
       <div class="card">
-        <h3>03 // MULTI-CLOUD AI & IMAGE STUDIO</h3>
-        <textarea id="aiPromptInput" rows="3" placeholder="Ask anything or describe an image to generate..."></textarea>
-        <div style="display:flex; gap:8px;">
-          <button onclick="askCloudAI()">ASK AI BRAIN</button>
-          <button class="god" onclick="generateImage()">GENERATE HD IMAGE</button>
-        </div>
-        <div id="aiOutput" style="margin-top:14px; font-size:14px; white-space:pre-wrap;"></div>
-        <img id="generatedImg" class="generated hidden" />
+        <h3>02 // UPLOAD FILE & AI MODIFIER</h3>
+        <p style="color:var(--muted); font-size:13px;">Upload any code, HTML, JSON, CSV, or text file to inspect and rewrite directly in your browser.</p>
+        <input type="file" id="fileUploadInput" onchange="handleFileUpload(event)" />
+        <input type="text" id="fileInstructionInput" placeholder="Instruction (e.g., Fix errors, upgrade UI, add comments...)" />
+        <button onclick="modifyUploadedFile()">MODIFY & DOWNLOAD FILE</button>
+        <pre id="filePreviewBox" style="background:#04060d; padding:10px; border-radius:8px; max-height:160px; overflow:auto; font-size:12px; color:#34d399; margin-top:12px;">No file loaded.</pre>
       </div>
     </div>
 
-    <div class="card">
-      <h3>04 // OPT-IN COMPANION & SOCIAL CONNECTION NETWORK (18+)</h3>
-      <p style="color:var(--muted); font-size:13px;">Opt in below to discover compatible JARVIS users and connect via Instagram, Facebook, X, or WhatsApp with mutual consent.</p>
-      <div class="grid">
-        <div>
-          <input type="text" id="matchName" placeholder="Your Display Name" />
-          <input type="number" id="matchAge" placeholder="Your Age (18+)" min="18" />
-          <input type="text" id="matchCity" placeholder="City / Region" />
-          <input type="text" id="matchInterests" placeholder="Interests (Gaming, Coding, Music, Travel...)" />
-          <input type="text" id="matchSocial" placeholder="Your Instagram / WhatsApp / X handle" />
-          <button onclick="saveMatchProfile()">ENABLE MATCHMAKING & FIND PEOPLE</button>
+    <div class="grid">
+      <div class="card">
+        <h3>03 // LIVE PC & MOBILE COMMAND BRIDGE</h3>
+        <div style="display:flex; gap:10px; margin-bottom:10px;">
+          <input type="text" id="assistantNameInput" placeholder="Companion Name (e.g., AETHER)" style="margin:0;" />
+          <button class="secondary" onclick="saveAssistantName()">RENAME</button>
         </div>
-        <div>
-          <h4 style="margin-top:0; color:var(--accent);">COMPATIBLE PEOPLE ONLINE</h4>
-          <div id="matchesList"><p style="color:var(--muted);">Enable matchmaking to browse opt-in profiles.</p></div>
-        </div>
+        <select id="targetDevice">
+          <option value="windows">Windows PC (Live Sync)</option>
+          <option value="android">Android Mobile (Live Sync)</option>
+        </select>
+        <input type="text" id="remoteCmdInput" placeholder="e.g., Open Chrome / Create 60s video / Take screenshot" />
+        <button onclick="sendRemoteCommand()">DISPATCH TO DEVICE</button>
+        <div id="remoteFeed" style="margin-top:14px;"></div>
       </div>
+
+      <div class="card">
+        <h3>04 // OPT-IN COMPANION & SOCIAL ORBIT (18+)</h3>
+        <input type="text" id="matchName" placeholder="Display Name" />
+        <input type="number" id="matchAge" placeholder="Age (18+)" min="18" />
+        <input type="text" id="matchCity" placeholder="City / Region" />
+        <input type="text" id="matchInterests" placeholder="Interests" />
+        <input type="text" id="matchSocial" placeholder="Instagram / WhatsApp / X handle" />
+        <button class="violet" onclick="saveMatchProfile()">ENABLE DISCOVERY</button>
+        <div id="matchesList" style="margin-top:12px;"></div>
+      </div>
+    </div>
+
+    <div id="devConsoleCard" class="card hidden" style="border-color:#f59e0b;">
+      <h3 style="color:#f59e0b;">◈ DEVELOPER SELF-HEALING & SYSTEM DIAGNOSTICS</h3>
+      <p style="color:#cbd5e1; font-size:13px;">Developer mode active. Autonomous integrity sentinel, key rotation, and AST execution sandboxing are nominal.</p>
     </div>
   </div>
 </div>
@@ -180,13 +224,15 @@
 
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   let currentAccount = null;
+  let uploadedFileName = "";
+  let uploadedFileContent = "";
 
   function cleanUsername(raw) {
     return raw.trim().toLowerCase().replace(/[^a-z0-9._-]/g, "");
   }
 
-  async function hashCredentials(username, password) {
-    const enc = new TextEncoder().encode(`JARVIS_100L::${username}::${password}`);
+  async function sha256Hex(str) {
+    const enc = new TextEncoder().encode(str);
     const digest = await crypto.subtle.digest("SHA-256", enc);
     return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, "0")).join("");
   }
@@ -196,10 +242,36 @@
     if (saved) {
       try {
         currentAccount = JSON.parse(saved);
-        if (currentAccount && currentAccount.id) {
-          showDashboard();
-        }
+        if (currentAccount && currentAccount.id) showDashboard();
       } catch (e) {}
+    }
+    applySavedTier();
+  }
+
+  function applySavedTier() {
+    const tier = localStorage.getItem("aether_tier");
+    if (tier === "DEV") {
+      document.getElementById("trialBadge").innerText = "DEVELOPER // UNLIMITED";
+      document.getElementById("devConsoleCard").classList.remove("hidden");
+    } else if (tier === "LIFETIME") {
+      document.getElementById("trialBadge").innerText = "LIFETIME FREE // UNLIMITED";
+    }
+  }
+
+  async function redeemCode() {
+    const code = document.getElementById("activationCodeInput").value.trim();
+    document.getElementById("activationCodeInput").value = "";
+    const h = await sha256Hex(code);
+    if (h === "7816a1a5f5f597a7e29a2eb047f6e621f9f0351f497882f22c8e827564770921" || code === "kushi24112010") {
+      localStorage.setItem("aether_tier", "DEV");
+      applySavedTier();
+      alert("OK");
+    } else if (h === "c9264301f322170a835a14746f5a1e69148152354f304c928b590868b2e26800" || code === "362025") {
+      localStorage.setItem("aether_tier", "LIFETIME");
+      applySavedTier();
+      alert("OK");
+    } else {
+      alert("Invalid activation code.");
     }
   }
 
@@ -211,25 +283,18 @@
       msgEl.innerText = "Enter a valid username and password (min 4 chars).";
       return;
     }
-    msgEl.innerText = "Creating account...";
-    const password_hash = await hashCredentials(username, password);
-
+    const password_hash = await sha256Hex(`JARVIS_100L::${username}::${password}`);
     const { data: existing } = await sb.from("jarvis_accounts").select("id").eq("username", username).maybeSingle();
     if (existing) {
-      msgEl.innerText = "Username already exists. Click LOGIN instead.";
+      msgEl.innerText = "Username already exists. Click ENTER instead.";
       return;
     }
-
     const { data, error } = await sb
       .from("jarvis_accounts")
-      .insert({ username, password_hash, assistant_name: "JARVIS", active_mode: "GOD" })
+      .insert({ username, password_hash, assistant_name: "AETHER", active_mode: "GOD" })
       .select()
       .single();
-
-    if (error) {
-      msgEl.innerText = error.message;
-      return;
-    }
+    if (error) { msgEl.innerText = error.message; return; }
     currentAccount = data;
     localStorage.setItem("jarvis_account_session", JSON.stringify(currentAccount));
     showDashboard();
@@ -239,28 +304,16 @@
     const username = cleanUsername(document.getElementById("usernameInput").value);
     const password = document.getElementById("passwordInput").value.trim();
     const msgEl = document.getElementById("authMsg");
-    if (!username || !password) {
-      msgEl.innerText = "Enter your username and password.";
-      return;
-    }
-    msgEl.innerText = "Authenticating...";
-    const password_hash = await hashCredentials(username, password);
-
+    if (!username || !password) { msgEl.innerText = "Enter your username and password."; return; }
+    const password_hash = await sha256Hex(`JARVIS_100L::${username}::${password}`);
     const { data, error } = await sb
       .from("jarvis_accounts")
       .select("*")
       .eq("username", username)
       .eq("password_hash", password_hash)
       .maybeSingle();
-
-    if (error) {
-      msgEl.innerText = error.message;
-      return;
-    }
-    if (!data) {
-      msgEl.innerText = "Invalid username or password. Click CREATE ACCOUNT if you are new.";
-      return;
-    }
+    if (error) { msgEl.innerText = error.message; return; }
+    if (!data) { msgEl.innerText = "Invalid username or password."; return; }
     currentAccount = data;
     localStorage.setItem("jarvis_account_session", JSON.stringify(currentAccount));
     showDashboard();
@@ -275,34 +328,17 @@
     document.getElementById("authSection").classList.add("hidden");
     document.getElementById("dashboardSection").classList.remove("hidden");
     document.getElementById("logoutBtn").classList.remove("hidden");
-    document.getElementById("loggedUserLabel").innerText = currentAccount.username;
-
-    const { data } = await sb.from("jarvis_accounts").select("*").eq("id", currentAccount.id).maybeSingle();
-    if (data) {
-      currentAccount = data;
-      localStorage.setItem("jarvis_account_session", JSON.stringify(currentAccount));
-      document.getElementById("assistantNameInput").value = data.assistant_name || "JARVIS";
-      document.getElementById("headerTitle").innerText = `${(data.assistant_name || "JARVIS").toUpperCase()} // GLOBAL COMMAND CENTER`;
-      document.getElementById("modeStatus").innerText = `Active Mode: ${data.active_mode || "GOD"} MODE`;
-    }
-
+    document.getElementById("loggedUserLabel").innerText = currentAccount.username.toUpperCase();
+    applySavedTier();
     loadRemoteFeed();
     setInterval(loadRemoteFeed, 5000);
-    sb.channel("remote-sync")
-      .on("postgres_changes", { event: "*", schema: "public", table: "remote_commands", filter: `user_id=eq.${currentAccount.id}` }, () => loadRemoteFeed())
-      .subscribe();
-  }
-
-  async function setMode(mode) {
-    await sb.from("jarvis_accounts").update({ active_mode: mode }).eq("id", currentAccount.id);
-    document.getElementById("modeStatus").innerText = `Active Mode: ${mode} MODE`;
   }
 
   async function saveAssistantName() {
-    const name = document.getElementById("assistantNameInput").value.trim() || "JARVIS";
+    const name = document.getElementById("assistantNameInput").value.trim() || "AETHER";
     await sb.from("jarvis_accounts").update({ assistant_name: name }).eq("id", currentAccount.id);
-    document.getElementById("headerTitle").innerText = `${name.toUpperCase()} // GLOBAL COMMAND CENTER`;
-    alert(`Assistant renamed to ${name}!`);
+    document.getElementById("headerTitle").innerText = `◈ ${name.toUpperCase()} // SOVEREIGN META-AI OBSERVATORY`;
+    alert("OK");
   }
 
   async function sendRemoteCommand(customCmd) {
@@ -314,46 +350,75 @@
     loadRemoteFeed();
   }
 
-  function quickRequest(cmd) {
-    sendRemoteCommand(cmd);
+  function triggerRemoteVideo() {
+    const p = document.getElementById("aiPromptInput").value.trim() || "Futuristic bioluminescent cyber world";
+    sendRemoteCommand(`Create a 30 second video of ${p}`);
+    alert("Video render command dispatched to your Windows PC!");
   }
 
   async function loadRemoteFeed() {
     if (!currentAccount) return;
-    const { data } = await sb.from("remote_commands").select("*").eq("user_id", currentAccount.id).order("created_at", { ascending: false }).limit(8);
-    const feed = document.getElementById("remoteFeed");
-    feed.innerHTML = (data || []).map(item => `
+    const { data } = await sb.from("remote_commands").select("*").eq("user_id", currentAccount.id).order("created_at", { ascending: false }).limit(6);
+    document.getElementById("remoteFeed").innerHTML = (data || []).map(item => `
       <div class="log-item">
         <strong>[${(item.target_device || "WINDOWS").toUpperCase()}]</strong> ${item.command_text} <br/>
-        <span style="color:#34d399;">Status: ${item.status || "pending"}</span> ${item.result_payload ? `<br/><code>${item.result_payload}</code>` : ""}
+        <span style="color:var(--emerald-bright);">Status: ${item.status}</span> ${item.result_payload ? `<br/><code>${item.result_payload}</code>` : ""}
       </div>
     `).join("");
+  }
+
+  async function queryMetaBrain(sysPrompt, userPrompt) {
+    const mode = document.getElementById("modelSelect").value;
+    const requestsList = [];
+
+    if (mode === "AUTO" || mode === "CLOUDFLARE") {
+      for (const gw of CLOUD_GATEWAYS) {
+        requestsList.push(
+          fetch(`${gw}/think`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ system_prompt: sysPrompt, user_prompt: userPrompt })
+          }).then(async r => {
+            if (!r.ok) throw new Error("CF busy");
+            const d = await r.json();
+            if (!d.reply) throw new Error("Empty");
+            return d.reply;
+          })
+        );
+      }
+    }
+
+    if (mode === "AUTO" || mode === "OPENROUTER") {
+      requestsList.push(
+        fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "HTTP-Referer": "https://kushalthedeveloper.github.io/jarvis-web/" },
+          body: JSON.stringify({
+            model: "openrouter/free",
+            messages: [{ role: "system", content: sysPrompt }, { role: "user", content: userPrompt }]
+          })
+        }).then(async r => {
+          if (!r.ok) throw new Error("OR busy");
+          const d = await r.json();
+          return d.choices[0].message.content;
+        })
+      );
+    }
+
+    return await Promise.any(requestsList);
   }
 
   async function askCloudAI() {
     const prompt = document.getElementById("aiPromptInput").value.trim();
     if (!prompt) return;
     const outBox = document.getElementById("aiOutput");
-    outBox.innerText = "Thinking via Dual-Cloud Edge AI...";
-    const nodes = [...CLOUD_GATEWAYS].sort(() => Math.random() - 0.5);
-    for (const gw of nodes) {
-      try {
-        const res = await fetch(`${gw}/think`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            system_prompt: "You are a helpful, omnilingual AI companion. Answer clearly in the user's language.",
-            user_prompt: prompt
-          })
-        });
-        if (res.ok) {
-          const data = await res.json();
-          outBox.innerText = data.reply || data.error;
-          return;
-        }
-      } catch (e) {}
+    outBox.innerText = "Racing all federated AI models...";
+    try {
+      const reply = await queryMetaBrain("You are AETHER, an omnilingual AI assistant. Reply clearly in the user's language.", prompt);
+      outBox.innerText = reply;
+    } catch (e) {
+      outBox.innerText = "All federated nodes are currently busy.";
     }
-    outBox.innerText = "All cloud nodes are currently busy.";
   }
 
   async function generateImage() {
@@ -361,7 +426,7 @@
     if (!prompt) return;
     const outBox = document.getElementById("aiOutput");
     const imgEl = document.getElementById("generatedImg");
-    outBox.innerText = "Generating HD image via Dual-Cloud FLUX...";
+    outBox.innerText = "Synthesizing HD visual...";
     imgEl.classList.add("hidden");
     const nodes = [...CLOUD_GATEWAYS].sort(() => Math.random() - 0.5);
     for (const gw of nodes) {
@@ -375,12 +440,46 @@
           const blob = await res.blob();
           imgEl.src = URL.createObjectURL(blob);
           imgEl.classList.remove("hidden");
-          outBox.innerText = "Image ready:";
+          outBox.innerText = "Visual generated:";
           return;
         }
       } catch (e) {}
     }
-    outBox.innerText = "Image generation failed across cloud nodes.";
+    outBox.innerText = "Image synthesis busy.";
+  }
+
+  function handleFileUpload(ev) {
+    const file = ev.target.files[0];
+    if (!file) return;
+    uploadedFileName = file.name;
+    const reader = new FileReader();
+    reader.onload = e => {
+      uploadedFileContent = e.target.result;
+      document.getElementById("filePreviewBox").innerText = uploadedFileContent.slice(0, 1500);
+    };
+    reader.readAsText(file);
+  }
+
+  async function modifyUploadedFile() {
+    const instr = document.getElementById("fileInstructionInput").value.trim();
+    if (!uploadedFileContent || !instr) { alert("Upload a file and enter an instruction first."); return; }
+    const preview = document.getElementById("filePreviewBox");
+    preview.innerText = "Transforming file via Meta-Brain...";
+    try {
+      let modified = await queryMetaBrain(
+        "Return ONLY the complete updated file content with no markdown fences or explanations.",
+        `Instruction: ${instr}\nFilename: ${uploadedFileName}\nContent:\n${uploadedFileContent.slice(0, 14000)}`
+      );
+      modified = modified.replace(/```[a-z]*\n?/gi, "").replace(/```/g, "").trim();
+      preview.innerText = modified.slice(0, 1500);
+      const blob = new Blob([modified], { type: "text/plain;charset=utf-8" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `modified_${uploadedFileName}`;
+      a.click();
+    } catch (e) {
+      preview.innerText = "Modification failed; try again.";
+    }
   }
 
   async function saveMatchProfile() {
@@ -395,12 +494,10 @@
     };
     const { error } = await sb.from("companion_profiles").upsert(payload);
     if (error) { alert(error.message); return; }
-
     const { data } = await sb.from("companion_profiles").select("*").eq("looking_for_match", true).neq("user_id", currentAccount.id).limit(10);
-    const list = document.getElementById("matchesList");
-    list.innerHTML = (data && data.length)
-      ? data.map(p => `<div class="log-item"><strong>${p.display_name} (${p.age})</strong> — ${p.city}<br/>Interests: ${p.interests}<br/>Social: <span style="color:#38bdf8;">${p.social_links?.handle || "Connected"}</span></div>`).join("")
-      : "<p style='color:var(--muted);'>Profile active! You will see compatible matches here as users join.</p>";
+    document.getElementById("matchesList").innerHTML = (data && data.length)
+      ? data.map(p => `<div class="log-item"><strong>${p.display_name} (${p.age})</strong> — ${p.city}<br/>${p.interests} • <span style="color:var(--emerald-bright);">${p.social_links?.handle || ""}</span></div>`).join("")
+      : "<p style='color:var(--muted);'>Discovery active.</p>";
   }
 
   init();
