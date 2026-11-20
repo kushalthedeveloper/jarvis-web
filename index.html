@@ -4,65 +4,19 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <title>SOVEREIGN // Mark LXXXV AI Studio</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="[https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2](https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2)"></script>
   <style>
-    :root {
-      --bg: #02060f;
-      --panel: #040b18;
-      --border: #0e3a5c;
-      --cyan: #00f0ff;
-      --gold: #f59e0b;
-      --text: #f8fafc;
-      --muted: #94a3b8;
-    }
+    :root { --bg: #02060f; --panel: #040b18; --border: #0e3a5c; --cyan: #00f0ff; --gold: #f59e0b; --text: #f8fafc; --muted: #94a3b8; }
     * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
     body { margin: 0; background: var(--bg); color: var(--text); min-height: 100vh; }
-    header {
-      background: var(--panel);
-      border-bottom: 1px solid var(--border);
-      padding: 14px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 20;
-    }
-    .brand { font-family: Consolas, monospace; font-weight: bold; color: var(--cyan); font-size: 16px; letter-spacing: 1px; }
+    header { background: var(--panel); border-bottom: 1px solid var(--border); padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 20; }
+    .brand { font-family: Consolas, monospace; font-weight: bold; color: var(--cyan); font-size: 15px; }
     .container { max-width: 1140px; margin: 18px auto; padding: 0 14px; }
-    .card {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 18px;
-      margin-bottom: 16px;
-      box-shadow: 0 0 24px rgba(0, 240, 255, 0.05);
-    }
+    .card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 18px; margin-bottom: 16px; }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
     h3 { margin-top: 0; color: var(--cyan); font-family: Consolas, monospace; font-size: 15px; }
-    input, select, textarea {
-      width: 100%;
-      padding: 11px 12px;
-      margin: 6px 0 10px;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      color: var(--text);
-      font-size: 14px;
-      outline: none;
-    }
-    input:focus, textarea:focus, select:focus { border-color: var(--cyan); }
-    button {
-      background: linear-gradient(135deg, var(--cyan), #0284c7);
-      color: #02060f;
-      border: none;
-      padding: 11px 16px;
-      border-radius: 10px;
-      font-weight: bold;
-      cursor: pointer;
-      font-family: Consolas, monospace;
-      font-size: 13px;
-    }
+    input, select, textarea { width: 100%; padding: 11px 12px; margin: 6px 0 10px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-size: 14px; outline: none; }
+    button { background: linear-gradient(135deg, var(--cyan), #0284c7); color: #02060f; border: none; padding: 10px 15px; border-radius: 10px; font-weight: bold; cursor: pointer; font-family: Consolas, monospace; font-size: 12px; }
     button.gold { background: linear-gradient(135deg, var(--gold), #d97706); color: #02060f; }
     button.secondary { background: #071a2f; color: #cbd5e1; border: 1px solid var(--border); }
     .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -70,25 +24,27 @@
     .hidden { display: none; }
     img.generated { max-width: 100%; border-radius: 10px; margin-top: 12px; border: 1px solid var(--cyan); }
     video.cam-preview { width: 100%; max-height: 220px; border-radius: 10px; background: #000; margin-top: 8px; }
-    @media (max-width: 600px) {
-      header { padding: 12px 14px; }
-      .brand { font-size: 14px; }
-      button { width: 100%; }
-    }
+    footer { text-align: center; padding: 18px; color: var(--muted); font-size: 12px; }
+    .modal { position: fixed; inset: 0; background: rgba(2,6,15,.88); display: none; align-items: center; justify-content: center; padding: 16px; z-index: 50; }
+    .modal-box { max-width: 560px; background: var(--panel); border: 1px solid var(--cyan); border-radius: 14px; padding: 20px; }
+    @media (max-width: 600px) { button { width: 100%; } }
   </style>
 </head>
 <body>
 
 <header>
-  <div class="brand">⬡ SOVEREIGN // MARK LXXXV STUDIO</div>
-  <button class="secondary hidden" id="logoutBtn" onclick="logout()">LOGOUT</button>
+  <div class="brand">⬡ SOVEREIGN // MARK LXXXV</div>
+  <div class="btn-row">
+    <button class="secondary" onclick="togglePrivacy(true)">PRIVACY</button>
+    <button class="secondary hidden" id="logoutBtn" onclick="logout()">LOGOUT</button>
+  </div>
 </header>
 
 <div class="container">
   <div id="authSection" class="card" style="max-width:420px; margin: 40px auto;">
     <h3>⬡ ACCESS MARK LXXXV CORE</h3>
-    <input type="text" id="usernameInput" placeholder="Username" autocomplete="username" />
-    <input type="password" id="passwordInput" placeholder="Password" autocomplete="current-password" />
+    <input type="text" id="usernameInput" placeholder="Username (min 3 chars)" autocomplete="username" />
+    <input type="password" id="passwordInput" placeholder="Password (min 6 chars)" autocomplete="current-password" />
     <div class="btn-row">
       <button onclick="login()" style="flex:1;">LOGIN</button>
       <button class="gold" onclick="signup()" style="flex:1;">CREATE ACCOUNT</button>
@@ -102,9 +58,9 @@
         <h3>01 // FRONTIER AI MESH, WEBSITES, GAMES & STUDY</h3>
         <select id="modelSelect">
           <option value="AUTO">AUTO STAGGERED WAVE (All Frontier Models)</option>
-          <option value="OPENROUTER">OpenRouter Frontier (Nemotron / Gemma 4 / Ling / ERNIE)</option>
-          <option value="CLOUDFLARE">Cloudflare Edge Mesh (DeepSeek / GLM / Llama)</option>
           <option value="POLLINATIONS">Pollinations Global Multi-Model Mesh</option>
+          <option value="OPENROUTER">OpenRouter Frontier Auto-Router</option>
+          <option value="CLOUDFLARE">Cloudflare Edge Mesh</option>
         </select>
         <textarea id="aiPromptInput" rows="3" placeholder="Ask anything, study help, or describe a website, 3D game, app, design, or image..."></textarea>
         <div class="btn-row">
@@ -114,12 +70,15 @@
           <button class="secondary" onclick="triggerRemoteVideo()">VIDEO ON PC</button>
         </div>
         <div id="aiOutput" style="margin-top:12px; font-size:14px; white-space:pre-wrap; line-height:1.5;"></div>
+        <div id="flagBar" class="hidden" style="margin-top:8px;">
+          <button class="secondary" style="font-size:11px; padding:6px 10px;" onclick="flagAIResponse()">⚑ REPORT / FLAG AI CONTENT</button>
+        </div>
         <img id="generatedImg" class="generated hidden" />
       </div>
 
       <div class="card">
         <h3>02 // CAMERA MOOD -> REELS & SONGS</h3>
-        <p style="color:var(--muted); font-size:13px;">Camera access is requested only when you click below to detect your mood and open matching music or reels.</p>
+        <p style="color:var(--muted); font-size:13px;">Camera access is requested only when clicked to detect your mood and open matching music or reels.</p>
         <button onclick="scanCameraMood()">SCAN MY MOOD NOW</button>
         <video id="moodVideo" class="cam-preview hidden" autoplay playsinline muted></video>
         <div id="moodResult" style="margin-top:10px; font-size:14px; color:var(--cyan);"></div>
@@ -137,7 +96,6 @@
 
       <div class="card">
         <h3>04 // LIVE PC & MOBILE COMMAND SYNC</h3>
-        <p style="color:var(--muted); font-size:12px; margin-top:0;">Heavy PC actions (MP4 video rendering, desktop apps) route directly to your signed-in Windows PC.</p>
         <select id="targetDevice">
           <option value="windows">Windows PC</option>
           <option value="android">Android Mobile</option>
@@ -149,22 +107,36 @@
     </div>
 
     <div id="devTrainerCard" class="card hidden" style="border-color:#f59e0b;">
-      <h3 style="color:#f59e0b;">⬡ DEVELOPER 1-SECOND AI TRAINER</h3>
+      <h3 style="color:#f59e0b;">⬡ DEVELOPER 1-SECOND AI TRAINER (VERIFIED GLOBAL)</h3>
       <input type="text" id="devTriggerInput" placeholder="Trigger phrase (what user asks)" />
       <input type="text" id="devReplyInput" placeholder="Instant answer" />
       <input type="text" id="devCodeInput" placeholder="Optional Python action code" />
-      <button class="gold" onclick="trainDevSkill()">TRAIN & SYNC IN 1 SECOND</button>
+      <button class="gold" onclick="trainDevSkill()">PUBLISH VERIFIED SKILL (<1S)</button>
     </div>
+  </div>
+</div>
+
+<footer>
+  SOVEREIGN // MARK LXXXV STUDIO • <a href="#" style="color:var(--cyan);" onclick="togglePrivacy(true);return false;">Privacy Policy & AI Safety</a>
+</footer>
+
+<div id="privacyModal" class="modal">
+  <div class="modal-box">
+    <h3>PRIVACY POLICY & AI SAFETY</h3>
+    <p style="font-size:13px; color:#cbd5e1; line-height:1.5;">
+      Sovereign Mark LXXXV Studio uses salted PBKDF2-SHA256 authentication without requiring your personal email. Camera and microphone streams are processed locally on-device only when explicitly activated by you and are never stored on cloud servers. Users may flag any AI-generated output at any time using the in-app Report button.
+    </p>
+    <button onclick="togglePrivacy(false)">CLOSE</button>
   </div>
 </div>
 
 <script>
   const CLOUD_GATEWAYS = [
-    "https://jarvis-neural-gateway.gattuchowdappa121.workers.dev",
-    "https://jarvis-neural-gateway.gattukushal68.workers.dev",
-    "https://jarvis-neural-gateway-beta.gattukushal68.workers.dev"
+    "[https://jarvis-neural-gateway.gattuchowdappa121.workers.dev](https://jarvis-neural-gateway.gattuchowdappa121.workers.dev)",
+    "[https://jarvis-neural-gateway.gattukushal68.workers.dev](https://jarvis-neural-gateway.gattukushal68.workers.dev)",
+    "[https://jarvis-neural-gateway-beta.gattukushal68.workers.dev](https://jarvis-neural-gateway-beta.gattukushal68.workers.dev)"
   ];
-  const SUPABASE_URL = "https://eoyftbixuwybuykjgrhr.supabase.co";
+  const SUPABASE_URL = "[https://eoyftbixuwybuykjgrhr.supabase.co](https://eoyftbixuwybuykjgrhr.supabase.co)";
   const SUPABASE_KEY = "sb_publishable_6vpris-KE1NpaguLqvt6zw_l5OnvrsE";
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -172,12 +144,21 @@
   let uploadedFileName = "";
   let uploadedFileContent = "";
   let lastBurstTs = 0;
+  let feedPollMs = 8000;
 
+  function togglePrivacy(show) { document.getElementById("privacyModal").style.display = show ? "flex" : "none"; }
   function cleanUsername(raw) { return raw.trim().toLowerCase().replace(/[^a-z0-9._-]/g, ""); }
+  function bufToHex(buf) { return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join(""); }
 
-  async function sha256Hex(str) {
-    const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
-    return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, "0")).join("");
+  async function legacySha256(str) {
+    return bufToHex(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str)));
+  }
+
+  async function deriveSaltedPbkdf2(password, saltHex = null) {
+    const salt = saltHex ? new Uint8Array(saltHex.match(/.{2}/g).map(h => parseInt(h, 16))) : crypto.getRandomValues(new Uint8Array(16));
+    const keyMat = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveBits"]);
+    const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt, iterations: 120000, hash: "SHA-256" }, keyMat, 256);
+    return `pbkdf2$120000$${bufToHex(salt)}$${bufToHex(bits)}`;
   }
 
   function init() {
@@ -188,19 +169,17 @@
         if (currentAccount && currentAccount.id) showDashboard();
       } catch (e) {}
     }
-    if (localStorage.getItem("jarvis_dev_mode") === "1") {
-      document.getElementById("devTrainerCard").classList.remove("hidden");
-    }
+    if (localStorage.getItem("jarvis_dev_mode") === "1") document.getElementById("devTrainerCard").classList.remove("hidden");
   }
 
   async function signup() {
     const username = cleanUsername(document.getElementById("usernameInput").value);
     const password = document.getElementById("passwordInput").value.trim();
     const msgEl = document.getElementById("authMsg");
-    if (!username || password.length < 4) { msgEl.innerText = "Enter username and password (min 4 chars)."; return; }
-    const password_hash = await sha256Hex(`JARVIS_100L::${username}::${password}`);
+    if (username.length < 3 || password.length < 6) { msgEl.innerText = "Username (min 3) and password (min 6) required."; return; }
+    const password_hash = await deriveSaltedPbkdf2(password);
     const { data: existing } = await sb.from("jarvis_accounts").select("id").eq("username", username).maybeSingle();
-    if (existing) { msgEl.innerText = "Username already exists. Click LOGIN."; return; }
+    if (existing) { msgEl.innerText = "Username taken. Choose another or click LOGIN."; return; }
     const { data, error } = await sb.from("jarvis_accounts").insert({ username, password_hash, assistant_name: "SOVEREIGN", active_mode: "GOD" }).select().single();
     if (error) { msgEl.innerText = error.message; return; }
     currentAccount = data;
@@ -213,9 +192,21 @@
     const password = document.getElementById("passwordInput").value.trim();
     const msgEl = document.getElementById("authMsg");
     if (!username || !password) { msgEl.innerText = "Enter username and password."; return; }
-    const password_hash = await sha256Hex(`JARVIS_100L::${username}::${password}`);
-    const { data, error } = await sb.from("jarvis_accounts").select("*").eq("username", username).eq("password_hash", password_hash).maybeSingle();
+    const { data, error } = await sb.from("jarvis_accounts").select("*").eq("username", username).maybeSingle();
     if (error || !data) { msgEl.innerText = "Invalid username or password."; return; }
+    const stored = data.password_hash || "";
+    let valid = false;
+    if (stored.startsWith("pbkdf2$")) {
+      const saltHex = stored.split("$")[2];
+      valid = (await deriveSaltedPbkdf2(password, saltHex)) === stored;
+    } else {
+      valid = (await legacySha256(`JARVIS_100L::${username}::${password}`)) === stored;
+      if (valid) {
+        const upgraded = await deriveSaltedPbkdf2(password);
+        await sb.from("jarvis_accounts").update({ password_hash: upgraded }).eq("id", data.id);
+      }
+    }
+    if (!valid) { msgEl.innerText = "Invalid username or password."; return; }
     currentAccount = data;
     localStorage.setItem("jarvis_account_session", JSON.stringify(currentAccount));
     showDashboard();
@@ -227,34 +218,38 @@
     document.getElementById("authSection").classList.add("hidden");
     document.getElementById("dashboardSection").classList.remove("hidden");
     document.getElementById("logoutBtn").classList.remove("hidden");
-    loadRemoteFeed();
-    setInterval(loadRemoteFeed, 5000);
+    scheduleFeedPoll();
+  }
+
+  async function scheduleFeedPoll() {
+    await loadRemoteFeed();
+    feedPollMs = Math.min(40000, feedPollMs + 4000);
+    setTimeout(scheduleFeedPoll, feedPollMs);
   }
 
   async function queryMetaBrain(sysPrompt, userPrompt) {
     const now = Date.now();
-    if (now - lastBurstTs < 1200) await new Promise(r => setTimeout(r, 1200));
+    if (now - lastBurstTs < 1400) await new Promise(r => setTimeout(r, 1400));
     lastBurstTs = Date.now();
-
     const mode = document.getElementById("modelSelect").value;
     const wave1 = [];
-    if (mode === "AUTO" || mode === "CLOUDFLARE") {
-      wave1.push(fetch(`${CLOUD_GATEWAYS[0]}/think`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ system_prompt: sysPrompt, user_prompt: userPrompt })
-      }).then(async r => { const d = await r.json(); if (!d.reply) throw 0; return d.reply; }));
+    // Prioritize zero-neuron endpoints first to preserve Cloudflare's 10,000 Neurons/day pool
+    if (mode === "AUTO" || mode === "POLLINATIONS") {
+      wave1.push(fetch(`[https://text.pollinations.ai/$](https://text.pollinations.ai/$){encodeURIComponent(sysPrompt + "\n" + userPrompt)}`).then(async r => { const t = await r.text(); if (!t) throw 0; return t; }));
     }
     if (mode === "AUTO" || mode === "OPENROUTER") {
-      wave1.push(fetch("https://openrouter.ai/api/v1/chat/completions", {
+      wave1.push(fetch("[https://openrouter.ai/api/v1/chat/completions](https://openrouter.ai/api/v1/chat/completions)", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ model: "openrouter/free", messages: [{ role: "system", content: sysPrompt }, { role: "user", content: userPrompt }] })
       }).then(async r => { const d = await r.json(); return d.choices[0].message.content; }));
     }
-    if (mode === "AUTO" || mode === "POLLINATIONS") {
-      wave1.push(fetch(`https://text.pollinations.ai/${encodeURIComponent(sysPrompt + "\n" + userPrompt)}`)
-        .then(async r => { const t = await r.text(); if (!t) throw 0; return t; }));
+    if (mode === "CLOUDFLARE") {
+      wave1.push(fetch(`${CLOUD_GATEWAYS[0]}/think`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ system_prompt: sysPrompt, user_prompt: userPrompt })
+      }).then(async r => { const d = await r.json(); if (!d.reply) throw 0; return d.reply; }));
     }
     return await Promise.any(wave1);
   }
@@ -262,25 +257,22 @@
   async function askCloudAI() {
     const prompt = document.getElementById("aiPromptInput").value.trim();
     if (!prompt) return;
-    if (prompt === "kushi24112010") {
-      localStorage.setItem("jarvis_dev_mode", "1");
-      document.getElementById("devTrainerCard").classList.remove("hidden");
-      document.getElementById("aiPromptInput").value = "";
-      alert("OK");
-      return;
-    }
-    if (prompt === "362025") {
-      document.getElementById("aiPromptInput").value = "";
-      alert("OK");
-      return;
-    }
+    if (prompt === "kushi24112010") { localStorage.setItem("jarvis_dev_mode", "1"); document.getElementById("devTrainerCard").classList.remove("hidden"); document.getElementById("aiPromptInput").value = ""; alert("OK"); return; }
+    if (prompt === "362025") { document.getElementById("aiPromptInput").value = ""; alert("OK"); return; }
     const outBox = document.getElementById("aiOutput");
     outBox.innerText = "Thinking...";
     try {
       outBox.innerText = await queryMetaBrain("You are Sovereign AI, an ultra-fast assistant for work, studies, coding, and design. Reply in the user's language.", prompt);
+      document.getElementById("flagBar").classList.remove("hidden");
     } catch (e) {
       outBox.innerText = "Ready for your next request.";
     }
+  }
+
+  async function flagAIResponse() {
+    const flagged_text = document.getElementById("aiOutput").innerText.slice(0, 1000);
+    await sb.from("ai_reports").insert({ user_id: currentAccount ? currentAccount.id : null, flagged_text, reason: "User flagged via Web/Mobile UI" });
+    alert("Thank you. Content has been flagged for safety review.");
   }
 
   async function buildInstantStudio() {
@@ -290,8 +282,7 @@
     try {
       let html = await queryMetaBrain("Return ONLY complete valid single-file HTML5 + CSS3 + JS starting with <!DOCTYPE html> with zero external CDNs.", `Create a responsive, modern website/app for: ${topic}`);
       html = html.replace(/```html/gi, "").replace(/```/g, "").trim();
-      const blob = new Blob([html], { type: "text/html;charset=utf-8" });
-      window.open(URL.createObjectURL(blob), "_blank");
+      window.open(URL.createObjectURL(new Blob([html], { type: "text/html;charset=utf-8" })), "_blank");
       outBox.innerText = "Website / App opened in a new tab!";
     } catch (e) {
       outBox.innerText = "Could not build right now.";
@@ -320,7 +311,7 @@
         const mood = avg > 115 ? "HAPPY & ENERGETIC" : (avg > 75 ? "FOCUSED & CHILL" : "CALM & RELAXED");
         const q = avg > 115 ? "feel+good+upbeat+songs+and+reels" : (avg > 75 ? "chill+lofi+study+work+music" : "soothing+peaceful+acoustic+songs");
         resEl.innerText = `Mood: ${mood} — Opening matching songs & reels!`;
-        window.open(`https://www.youtube.com/results?search_query=${q}`, "_blank");
+        window.open(`[https://www.youtube.com/results?search_query=$](https://www.youtube.com/results?search_query=$){q}`, "_blank");
       }, 1400);
     } catch (e) {
       resEl.innerText = "Camera permission needed to scan mood.";
@@ -330,6 +321,14 @@
   async function generateImage() {
     const prompt = document.getElementById("aiPromptInput").value.trim();
     if (!prompt) return;
+    const today = new Date().toISOString().slice(0, 10);
+    const key = `img_count_${today}`;
+    const used = parseInt(localStorage.getItem(key) || "0", 10);
+    if (used >= 8 && localStorage.getItem("jarvis_dev_mode") !== "1") {
+      document.getElementById("aiOutput").innerText = "Daily cloud image quota reached (8/day). Try again tomorrow.";
+      return;
+    }
+    localStorage.setItem(key, String(used + 1));
     const outBox = document.getElementById("aiOutput");
     const imgEl = document.getElementById("generatedImg");
     outBox.innerText = "Generating image...";
@@ -374,15 +373,16 @@
   async function trainDevSkill() {
     const trig = document.getElementById("devTriggerInput").value.trim().toLowerCase();
     const code = document.getElementById("devCodeInput").value.trim();
-    if (!trig) return;
-    if (code) await sb.from("global_skills").insert({ trigger_phrase: trig, python_action: code });
-    alert("OK — Trained in 1s!");
+    if (!trig || !code) return;
+    await sb.from("global_skills").insert({ trigger_phrase: trig, python_action: code, is_verified: true });
+    alert("OK — Verified Global Skill Published!");
   }
 
   async function sendRemoteCommand(customCmd) {
     const target_device = document.getElementById("targetDevice").value;
     const command_text = customCmd || document.getElementById("remoteCmdInput").value.trim();
     if (!command_text) return;
+    feedPollMs = 5000;
     await sb.from("remote_commands").insert({ user_id: currentAccount.id, target_device, command_text, status: "pending" });
     document.getElementById("remoteCmdInput").value = "";
     loadRemoteFeed();
