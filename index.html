@@ -3,237 +3,158 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <title>SOVEREIGN // Mark LXXXV 3D Hologram Studio</title>
+  <title>SOVEREIGN // Mark LXXXV AI Studio</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
-      --bg: #000000;
-      --panel: #06070b;
-      --border: #171c29;
-      --gold: #ffb703;
-      --amber: #f59e0b;
+      --bg: #02060f;
+      --panel: #040b18;
+      --border: #0e3a5c;
       --cyan: #00f0ff;
+      --gold: #f59e0b;
       --text: #f8fafc;
       --muted: #94a3b8;
     }
     * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
     body { margin: 0; background: var(--bg); color: var(--text); min-height: 100vh; }
     header {
-      background: #040508;
+      background: var(--panel);
       border-bottom: 1px solid var(--border);
-      padding: 12px 18px;
+      padding: 14px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      flex-wrap: wrap;
-      gap: 10px;
       position: sticky;
       top: 0;
       z-index: 20;
     }
-    .brand { font-family: Consolas, monospace; font-weight: bold; color: var(--gold); font-size: 15px; }
-    .nav-menus { display: flex; gap: 6px; flex-wrap: wrap; }
-    .nav-btn {
-      background: #0b0e16;
-      color: var(--text);
-      border: 1px solid var(--border);
-      padding: 7px 12px;
-      border-radius: 8px;
-      font-family: Consolas, monospace;
-      font-size: 12px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .nav-btn.active { background: var(--gold); color: #000000; border-color: var(--gold); }
-    .container { max-width: 1120px; margin: 18px auto; padding: 0 14px; }
-    .holo-stage {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 10px 0 18px;
-    }
-    #holoCanvas { width: 320px; height: 280px; background: #000000; }
-    .holo-caption { font-family: Consolas, monospace; color: var(--gold); font-size: 12px; letter-spacing: 1px; }
+    .brand { font-family: Consolas, monospace; font-weight: bold; color: var(--cyan); font-size: 16px; letter-spacing: 1px; }
+    .container { max-width: 1140px; margin: 18px auto; padding: 0 14px; }
     .card {
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: 14px;
       padding: 18px;
       margin-bottom: 16px;
+      box-shadow: 0 0 24px rgba(0, 240, 255, 0.05);
     }
-    h3 { margin-top: 0; color: var(--gold); font-family: Consolas, monospace; font-size: 15px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+    h3 { margin-top: 0; color: var(--cyan); font-family: Consolas, monospace; font-size: 15px; }
     input, select, textarea {
       width: 100%;
       padding: 11px 12px;
       margin: 6px 0 10px;
-      background: #000000;
+      background: var(--bg);
       border: 1px solid var(--border);
       border-radius: 10px;
       color: var(--text);
       font-size: 14px;
       outline: none;
     }
-    button.action-btn {
-      background: linear-gradient(135deg, var(--gold), var(--amber));
-      color: #000000;
+    input:focus, textarea:focus, select:focus { border-color: var(--cyan); }
+    button {
+      background: linear-gradient(135deg, var(--cyan), #0284c7);
+      color: #02060f;
       border: none;
-      padding: 10px 15px;
+      padding: 11px 16px;
       border-radius: 10px;
       font-weight: bold;
       cursor: pointer;
       font-family: Consolas, monospace;
-      font-size: 12px;
+      font-size: 13px;
     }
-    button.secondary-btn {
-      background: #0c1018;
-      color: var(--cyan);
-      border: 1px solid var(--border);
-      padding: 10px 14px;
-      border-radius: 10px;
-      font-weight: bold;
-      cursor: pointer;
-      font-family: Consolas, monospace;
-      font-size: 12px;
-    }
+    button.gold { background: linear-gradient(135deg, var(--gold), #d97706); color: #02060f; }
+    button.secondary { background: #071a2f; color: #cbd5e1; border: 1px solid var(--border); }
     .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
-    .log-item { background: #000000; border-left: 3px solid var(--gold); padding: 10px; margin-top: 8px; border-radius: 8px; font-size: 13px; }
+    .log-item { background: var(--bg); border-left: 3px solid var(--cyan); padding: 10px; margin-top: 8px; border-radius: 8px; font-size: 13px; }
     .hidden { display: none; }
-    img.generated { max-width: 100%; border-radius: 10px; margin-top: 12px; border: 1px solid var(--gold); }
+    img.generated { max-width: 100%; border-radius: 10px; margin-top: 12px; border: 1px solid var(--cyan); }
     video.cam-preview { width: 100%; max-height: 220px; border-radius: 10px; background: #000; margin-top: 8px; }
-    footer { text-align: center; padding: 18px; color: var(--muted); font-size: 12px; }
-    .modal { position: fixed; inset: 0; background: rgba(0,0,0,.88); display: none; align-items: center; justify-content: center; padding: 16px; z-index: 50; }
-    .modal-box { max-width: 560px; background: var(--panel); border: 1px solid var(--gold); border-radius: 14px; padding: 20px; }
+    @media (max-width: 600px) {
+      header { padding: 12px 14px; }
+      .brand { font-size: 14px; }
+      button { width: 100%; }
+    }
   </style>
 </head>
 <body>
 
 <header>
-  <div class="brand">◈ SOVEREIGN // MARK LXXXV</div>
-  <div class="nav-menus" id="mainNav">
-    <button class="nav-btn active" data-menu="CORE" onclick="switchMenu('CORE')">HOLO CORE</button>
-    <button class="nav-btn" data-menu="STUDIO" onclick="switchMenu('STUDIO')">STUDIO</button>
-    <button class="nav-btn" data-menu="TOOLS" onclick="switchMenu('TOOLS')">MOOD & FILES</button>
-    <button class="nav-btn" data-menu="SYNC" onclick="switchMenu('SYNC')">SYNC</button>
-  </div>
-  <div class="btn-row">
-    <button class="secondary-btn" onclick="togglePrivacy(true)">PRIVACY</button>
-    <button class="secondary-btn hidden" id="logoutBtn" onclick="logout()">LOGOUT</button>
-  </div>
+  <div class="brand">⬡ SOVEREIGN // MARK LXXXV STUDIO</div>
+  <button class="secondary hidden" id="logoutBtn" onclick="logout()">LOGOUT</button>
 </header>
 
 <div class="container">
-  <div id="authSection" class="card" style="max-width:420px; margin: 36px auto;">
-    <div class="holo-stage" style="padding:4px 0 12px;">
-      <canvas id="authHoloCanvas" width="180" height="150"></canvas>
-    </div>
-    <h3>◈ ENTER MARK LXXXV CORE</h3>
-    <input type="text" id="usernameInput" placeholder="Username (min 3 chars)" autocomplete="username" />
-    <input type="password" id="passwordInput" placeholder="Password (min 6 chars)" autocomplete="current-password" />
+  <div id="authSection" class="card" style="max-width:420px; margin: 40px auto;">
+    <h3>⬡ ACCESS MARK LXXXV CORE</h3>
+    <input type="text" id="usernameInput" placeholder="Username" autocomplete="username" />
+    <input type="password" id="passwordInput" placeholder="Password" autocomplete="current-password" />
     <div class="btn-row">
-      <button class="action-btn" onclick="login()" style="flex:1;">LOGIN</button>
-      <button class="secondary-btn" onclick="signup()" style="flex:1;">CREATE ACCOUNT</button>
+      <button onclick="login()" style="flex:1;">LOGIN</button>
+      <button class="gold" onclick="signup()" style="flex:1;">CREATE ACCOUNT</button>
     </div>
-    <p id="authMsg" style="color:var(--gold); font-size:13px; margin-top:10px;"></p>
+    <p id="authMsg" style="color:var(--cyan); font-size:13px; margin-top:10px;"></p>
   </div>
 
   <div id="dashboardSection" class="hidden">
-    <!-- MENU 1: 3D HOLOGRAPHIC CORE & AI CHAT -->
-    <div id="menu-CORE" class="menu-section">
-      <div class="holo-stage">
-        <canvas id="holoCanvas" width="320" height="280"></canvas>
-        <div class="holo-caption" id="holoStatus">3D HOLOGRAPHIC MATRIX // STANDBY</div>
-      </div>
+    <div class="grid">
       <div class="card">
-        <h3>01 // SOVEREIGN NEURAL INTERFACE</h3>
+        <h3>01 // FRONTIER AI MESH, WEBSITES, GAMES & STUDY</h3>
         <select id="modelSelect">
           <option value="AUTO">AUTO STAGGERED WAVE (All Frontier Models)</option>
+          <option value="OPENROUTER">OpenRouter Frontier (Nemotron / Gemma 4 / Ling / ERNIE)</option>
+          <option value="CLOUDFLARE">Cloudflare Edge Mesh (DeepSeek / GLM / Llama)</option>
           <option value="POLLINATIONS">Pollinations Global Multi-Model Mesh</option>
-          <option value="OPENROUTER">OpenRouter Frontier Auto-Router</option>
-          <option value="CLOUDFLARE">Cloudflare Edge Mesh</option>
         </select>
-        <textarea id="aiPromptInput" rows="3" placeholder="Ask anything, study topics, code, or ideas..."></textarea>
+        <textarea id="aiPromptInput" rows="3" placeholder="Ask anything, study help, or describe a website, 3D game, app, design, or image..."></textarea>
         <div class="btn-row">
-          <button class="action-btn" onclick="askCloudAI()">ASK SOVEREIGN</button>
-          <button class="secondary-btn" onclick="switchMenu('STUDIO')">OPEN STUDIO MENU</button>
-          <button class="secondary-btn" onclick="switchMenu('TOOLS')">OPEN MOOD & FILES</button>
+          <button onclick="askCloudAI()">ASK AI</button>
+          <button class="gold" onclick="buildInstantStudio()">BUILD WEBSITE / APP</button>
+          <button class="secondary" onclick="generateImage()">HD IMAGE</button>
+          <button class="secondary" onclick="triggerRemoteVideo()">VIDEO ON PC</button>
         </div>
         <div id="aiOutput" style="margin-top:12px; font-size:14px; white-space:pre-wrap; line-height:1.5;"></div>
-        <div id="flagBar" class="hidden" style="margin-top:8px;">
-          <button class="secondary-btn" style="font-size:11px; padding:6px 10px;" onclick="flagAIResponse()">⚑ REPORT / FLAG AI CONTENT</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- MENU 2: STUDIO (WEBSITES, APPS, IMAGES, PC VIDEO) -->
-    <div id="menu-STUDIO" class="menu-section hidden">
-      <div class="card">
-        <h3>02 // WEBSITE, WEB APP, HD IMAGE & PC VIDEO STUDIO</h3>
-        <textarea id="studioPromptInput" rows="2" placeholder="Describe a website, app, 3D game concept, image, or video..."></textarea>
-        <div class="btn-row">
-          <button class="action-btn" onclick="buildInstantStudio()">BUILD WEBSITE / APP</button>
-          <button class="secondary-btn" onclick="generateImage()">GENERATE HD IMAGE</button>
-          <button class="secondary-btn" onclick="triggerRemoteVideo()">RENDER VIDEO ON PC</button>
-        </div>
-        <div id="studioOutput" style="margin-top:12px; font-size:13px; color:var(--gold);"></div>
         <img id="generatedImg" class="generated hidden" />
       </div>
+
+      <div class="card">
+        <h3>02 // CAMERA MOOD -> REELS & SONGS</h3>
+        <p style="color:var(--muted); font-size:13px;">Camera access is requested only when you click below to detect your mood and open matching music or reels.</p>
+        <button onclick="scanCameraMood()">SCAN MY MOOD NOW</button>
+        <video id="moodVideo" class="cam-preview hidden" autoplay playsinline muted></video>
+        <div id="moodResult" style="margin-top:10px; font-size:14px; color:var(--cyan);"></div>
+      </div>
     </div>
 
-    <!-- MENU 3: CAMERA MOOD & FILE EDITOR -->
-    <div id="menu-TOOLS" class="menu-section hidden">
+    <div class="grid">
       <div class="card">
-        <h3>03 // CAMERA MOOD -> REELS & SONGS</h3>
-        <p style="color:var(--muted); font-size:13px;">Camera starts only when you click below.</p>
-        <button class="action-btn" onclick="scanCameraMood()">SCAN MY MOOD NOW</button>
-        <video id="moodVideo" class="cam-preview hidden" autoplay playsinline muted></video>
-        <div id="moodResult" style="margin-top:10px; font-size:14px; color:var(--gold);"></div>
-      </div>
-
-      <div class="card">
-        <h3>04 // FILE UPLOAD & AI EDITOR</h3>
+        <h3>03 // FILE UPLOAD & AI EDITOR</h3>
         <input type="file" id="fileUploadInput" onchange="handleFileUpload(event)" />
         <input type="text" id="fileInstructionInput" placeholder="What should be edited or extracted from this file?" />
-        <button class="action-btn" onclick="modifyUploadedFile()">EDIT & DOWNLOAD FILE</button>
-        <pre id="filePreviewBox" style="background:#000000; padding:10px; border-radius:8px; max-height:140px; overflow:auto; font-size:12px; color:var(--cyan); margin-top:10px;">No file selected.</pre>
+        <button onclick="modifyUploadedFile()">EDIT & DOWNLOAD FILE</button>
+        <pre id="filePreviewBox" style="background:var(--bg); padding:10px; border-radius:8px; max-height:140px; overflow:auto; font-size:12px; color:var(--cyan); margin-top:10px;">No file selected.</pre>
       </div>
-    </div>
 
-    <!-- MENU 4: DEVICE SYNC & DEVELOPER TRAINER -->
-    <div id="menu-SYNC" class="menu-section hidden">
       <div class="card">
-        <h3>05 // LIVE PC & MOBILE COMMAND SYNC</h3>
+        <h3>04 // LIVE PC & MOBILE COMMAND SYNC</h3>
+        <p style="color:var(--muted); font-size:12px; margin-top:0;">Heavy PC actions (MP4 video rendering, desktop apps) route directly to your signed-in Windows PC.</p>
         <select id="targetDevice">
           <option value="windows">Windows PC</option>
           <option value="android">Android Mobile</option>
         </select>
-        <input type="text" id="remoteCmdInput" placeholder="Send command to paired device..." />
-        <button class="action-btn" onclick="sendRemoteCommand()">SEND COMMAND</button>
+        <input type="text" id="remoteCmdInput" placeholder="e.g., Open Chrome / Create 20s video / Check my mood" />
+        <button onclick="sendRemoteCommand()">SEND TO DEVICE</button>
         <div id="remoteFeed" style="margin-top:10px;"></div>
       </div>
-
-      <div id="devTrainerCard" class="card hidden" style="border-color:var(--gold);">
-        <h3>◈ DEVELOPER 1-SECOND SKILL TRAINER</h3>
-        <input type="text" id="devTriggerInput" placeholder="Trigger phrase" />
-        <input type="text" id="devReplyInput" placeholder="Instant answer" />
-        <input type="text" id="devCodeInput" placeholder="Optional Python action code" />
-        <button class="action-btn" onclick="trainDevSkill()">PUBLISH VERIFIED SKILL</button>
-      </div>
     </div>
-  </div>
-</div>
 
-<footer>
-  SOVEREIGN // MARK LXXXV • <a href="#" style="color:var(--gold);" onclick="togglePrivacy(true);return false;">Privacy Policy & AI Safety</a>
-</footer>
-
-<div id="privacyModal" class="modal">
-  <div class="modal-box">
-    <h3>PRIVACY POLICY & AI SAFETY</h3>
-    <p style="font-size:13px; color:#cbd5e1; line-height:1.5;">
-      Sovereign Mark LXXXV uses salted PBKDF2-SHA256 authentication without requiring an email address. Camera streams are processed locally only when you click Scan My Mood and are never uploaded or stored. You can report any AI response anytime using the Report button.
-    </p>
-    <button class="action-btn" onclick="togglePrivacy(false)">CLOSE</button>
+    <div id="devTrainerCard" class="card hidden" style="border-color:#f59e0b;">
+      <h3 style="color:#f59e0b;">⬡ DEVELOPER 1-SECOND AI TRAINER</h3>
+      <input type="text" id="devTriggerInput" placeholder="Trigger phrase (what user asks)" />
+      <input type="text" id="devReplyInput" placeholder="Instant answer" />
+      <input type="text" id="devCodeInput" placeholder="Optional Python action code" />
+      <button class="gold" onclick="trainDevSkill()">TRAIN & SYNC IN 1 SECOND</button>
+    </div>
   </div>
 </div>
 
@@ -251,89 +172,12 @@
   let uploadedFileName = "";
   let uploadedFileContent = "";
   let lastBurstTs = 0;
-  let feedPollMs = 8000;
-  let holoPhase = 0;
 
-  function draw3DHologram(canvasId, phase) {
-    const canvas = document.getElementById(canvasId);
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    const w = canvas.width, h = canvas.height, cx = w / 2, cy = h / 2;
-    ctx.fillStyle = "#000000";
-    ctx.fillRect(0, 0, w, h);
-
-    const tilt = 0.45 + 0.12 * Math.sin(phase * 0.7);
-    const rings = [
-      { r: Math.min(w, h) * 0.38, yaw: 0.4, col: "#ffb703" },
-      { r: Math.min(w, h) * 0.30, yaw: -0.6, col: "#f59e0b" },
-      { r: Math.min(w, h) * 0.22, yaw: 0.9, col: "#00f0ff" },
-    ];
-    for (const rg of rings) {
-      ctx.beginPath();
-      for (let i = 0; i <= 64; i++) {
-        const a = (i / 64) * Math.PI * 2 + phase * rg.yaw * 2.0;
-        const x3 = rg.r * Math.cos(a);
-        const y3 = rg.r * Math.sin(a) * Math.cos(tilt);
-        const z3 = rg.r * Math.sin(a) * Math.sin(tilt);
-        const p = 260 / (260 - z3 * 0.6);
-        const sx = cx + x3 * p, sy = cy + y3 * p;
-        if (i === 0) ctx.moveTo(sx, sy); else ctx.lineTo(sx, sy);
-      }
-      ctx.strokeStyle = rg.col;
-      ctx.lineWidth = 1.6;
-      ctx.stroke();
-    }
-
-    for (let k = 0; k < 28; k++) {
-      const lon = k * 2.39996 + phase * (0.6 + (k % 4) * 0.2);
-      const lat = ((k * 137.5) % 150 - 75) * Math.PI / 180;
-      const rad = Math.min(w, h) * 0.26;
-      const x3 = rad * Math.cos(lat) * Math.cos(lon);
-      const y3 = rad * Math.sin(lat) * 0.85;
-      const z3 = rad * Math.cos(lat) * Math.sin(lon);
-      const p = 250 / (250 - z3);
-      ctx.fillStyle = k % 3 === 0 ? "#00f0ff" : "#ffd166";
-      ctx.beginPath();
-      ctx.arc(cx + x3 * p, cy + y3 * p, Math.max(1.2, 2.4 * p), 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    const coreR = 16 + 3 * Math.sin(phase * 3.0);
-    ctx.beginPath();
-    ctx.arc(cx, cy, coreR, 0, Math.PI * 2);
-    ctx.fillStyle = "#1b1202";
-    ctx.fill();
-    ctx.strokeStyle = "#ffb703";
-    ctx.lineWidth = 2;
-    ctx.stroke();
-  }
-
-  setInterval(() => {
-    holoPhase += 0.035;
-    draw3DHologram("holoCanvas", holoPhase);
-    draw3DHologram("authHoloCanvas", holoPhase);
-  }, 35);
-
-  function switchMenu(menuKey) {
-    document.querySelectorAll(".menu-section").forEach(el => el.classList.add("hidden"));
-    const target = document.getElementById(`menu-${menuKey}`);
-    if (target) target.classList.remove("hidden");
-    document.querySelectorAll(".nav-btn").forEach(btn => {
-      btn.classList.toggle("active", btn.dataset.menu === menuKey);
-    });
-  }
-
-  function togglePrivacy(show) { document.getElementById("privacyModal").style.display = show ? "flex" : "none"; }
   function cleanUsername(raw) { return raw.trim().toLowerCase().replace(/[^a-z0-9._-]/g, ""); }
-  function bufToHex(buf) { return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join(""); }
 
-  async function legacySha256(str) { return bufToHex(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str))); }
-
-  async function deriveSaltedPbkdf2(password, saltHex = null) {
-    const salt = saltHex ? new Uint8Array(saltHex.match(/.{2}/g).map(h => parseInt(h, 16))) : crypto.getRandomValues(new Uint8Array(16));
-    const keyMat = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveBits"]);
-    const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt, iterations: 120000, hash: "SHA-256" }, keyMat, 256);
-    return `pbkdf2$120000$${bufToHex(salt)}$${bufToHex(bits)}`;
+  async function sha256Hex(str) {
+    const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, "0")).join("");
   }
 
   function init() {
@@ -344,17 +188,19 @@
         if (currentAccount && currentAccount.id) showDashboard();
       } catch (e) {}
     }
-    if (localStorage.getItem("jarvis_dev_mode") === "1") document.getElementById("devTrainerCard").classList.remove("hidden");
+    if (localStorage.getItem("jarvis_dev_mode") === "1") {
+      document.getElementById("devTrainerCard").classList.remove("hidden");
+    }
   }
 
   async function signup() {
     const username = cleanUsername(document.getElementById("usernameInput").value);
     const password = document.getElementById("passwordInput").value.trim();
     const msgEl = document.getElementById("authMsg");
-    if (username.length < 3 || password.length < 6) { msgEl.innerText = "Username (min 3) and password (min 6) required."; return; }
-    const password_hash = await deriveSaltedPbkdf2(password);
+    if (!username || password.length < 4) { msgEl.innerText = "Enter username and password (min 4 chars)."; return; }
+    const password_hash = await sha256Hex(`JARVIS_100L::${username}::${password}`);
     const { data: existing } = await sb.from("jarvis_accounts").select("id").eq("username", username).maybeSingle();
-    if (existing) { msgEl.innerText = "Username taken. Choose another or click LOGIN."; return; }
+    if (existing) { msgEl.innerText = "Username already exists. Click LOGIN."; return; }
     const { data, error } = await sb.from("jarvis_accounts").insert({ username, password_hash, assistant_name: "SOVEREIGN", active_mode: "GOD" }).select().single();
     if (error) { msgEl.innerText = error.message; return; }
     currentAccount = data;
@@ -367,17 +213,9 @@
     const password = document.getElementById("passwordInput").value.trim();
     const msgEl = document.getElementById("authMsg");
     if (!username || !password) { msgEl.innerText = "Enter username and password."; return; }
-    const { data, error } = await sb.from("jarvis_accounts").select("*").eq("username", username).maybeSingle();
+    const password_hash = await sha256Hex(`JARVIS_100L::${username}::${password}`);
+    const { data, error } = await sb.from("jarvis_accounts").select("*").eq("username", username).eq("password_hash", password_hash).maybeSingle();
     if (error || !data) { msgEl.innerText = "Invalid username or password."; return; }
-    const stored = data.password_hash || "";
-    let valid = false;
-    if (stored.startsWith("pbkdf2$")) {
-      valid = (await deriveSaltedPbkdf2(password, stored.split("$")[2])) === stored;
-    } else {
-      valid = (await legacySha256(`JARVIS_100L::${username}::${password}`)) === stored;
-      if (valid) await sb.from("jarvis_accounts").update({ password_hash: await deriveSaltedPbkdf2(password) }).eq("id", data.id);
-    }
-    if (!valid) { msgEl.innerText = "Invalid username or password."; return; }
     currentAccount = data;
     localStorage.setItem("jarvis_account_session", JSON.stringify(currentAccount));
     showDashboard();
@@ -389,23 +227,23 @@
     document.getElementById("authSection").classList.add("hidden");
     document.getElementById("dashboardSection").classList.remove("hidden");
     document.getElementById("logoutBtn").classList.remove("hidden");
-    scheduleFeedPoll();
-  }
-
-  async function scheduleFeedPoll() {
-    await loadRemoteFeed();
-    feedPollMs = Math.min(40000, feedPollMs + 4000);
-    setTimeout(scheduleFeedPoll, feedPollMs);
+    loadRemoteFeed();
+    setInterval(loadRemoteFeed, 5000);
   }
 
   async function queryMetaBrain(sysPrompt, userPrompt) {
     const now = Date.now();
-    if (now - lastBurstTs < 1400) await new Promise(r => setTimeout(r, 1400));
+    if (now - lastBurstTs < 1200) await new Promise(r => setTimeout(r, 1200));
     lastBurstTs = Date.now();
+
     const mode = document.getElementById("modelSelect").value;
     const wave1 = [];
-    if (mode === "AUTO" || mode === "POLLINATIONS") {
-      wave1.push(fetch(`https://text.pollinations.ai/${encodeURIComponent(sysPrompt + "\n" + userPrompt)}`).then(async r => { const t = await r.text(); if (!t) throw 0; return t; }));
+    if (mode === "AUTO" || mode === "CLOUDFLARE") {
+      wave1.push(fetch(`${CLOUD_GATEWAYS[0]}/think`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ system_prompt: sysPrompt, user_prompt: userPrompt })
+      }).then(async r => { const d = await r.json(); if (!d.reply) throw 0; return d.reply; }));
     }
     if (mode === "AUTO" || mode === "OPENROUTER") {
       wave1.push(fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -414,12 +252,9 @@
         body: JSON.stringify({ model: "openrouter/free", messages: [{ role: "system", content: sysPrompt }, { role: "user", content: userPrompt }] })
       }).then(async r => { const d = await r.json(); return d.choices[0].message.content; }));
     }
-    if (mode === "CLOUDFLARE") {
-      wave1.push(fetch(`${CLOUD_GATEWAYS[0]}/think`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ system_prompt: sysPrompt, user_prompt: userPrompt })
-      }).then(async r => { const d = await r.json(); if (!d.reply) throw 0; return d.reply; }));
+    if (mode === "AUTO" || mode === "POLLINATIONS") {
+      wave1.push(fetch(`https://text.pollinations.ai/${encodeURIComponent(sysPrompt + "\n" + userPrompt)}`)
+        .then(async r => { const t = await r.text(); if (!t) throw 0; return t; }));
     }
     return await Promise.any(wave1);
   }
@@ -427,37 +262,37 @@
   async function askCloudAI() {
     const prompt = document.getElementById("aiPromptInput").value.trim();
     if (!prompt) return;
-    if (prompt === "kushi24112010") { localStorage.setItem("jarvis_dev_mode", "1"); document.getElementById("devTrainerCard").classList.remove("hidden"); document.getElementById("aiPromptInput").value = ""; alert("OK"); return; }
-    if (prompt === "362025") { document.getElementById("aiPromptInput").value = ""; alert("OK"); return; }
+    if (prompt === "kushi24112010") {
+      localStorage.setItem("jarvis_dev_mode", "1");
+      document.getElementById("devTrainerCard").classList.remove("hidden");
+      document.getElementById("aiPromptInput").value = "";
+      alert("OK");
+      return;
+    }
+    if (prompt === "362025") {
+      document.getElementById("aiPromptInput").value = "";
+      alert("OK");
+      return;
+    }
     const outBox = document.getElementById("aiOutput");
-    const statusEl = document.getElementById("holoStatus");
-    outBox.innerText = "Processing...";
-    statusEl.innerText = "3D HOLOGRAPHIC MATRIX // THINKING";
+    outBox.innerText = "Thinking...";
     try {
       outBox.innerText = await queryMetaBrain("You are Sovereign AI, an ultra-fast assistant for work, studies, coding, and design. Reply in the user's language.", prompt);
-      document.getElementById("flagBar").classList.remove("hidden");
     } catch (e) {
       outBox.innerText = "Ready for your next request.";
-    } finally {
-      statusEl.innerText = "3D HOLOGRAPHIC MATRIX // STANDBY";
     }
   }
 
-  async function flagAIResponse() {
-    const flagged_text = document.getElementById("aiOutput").innerText.slice(0, 1000);
-    await sb.from("ai_reports").insert({ user_id: currentAccount ? currentAccount.id : null, flagged_text, reason: "User flagged via Web/Mobile UI" });
-    alert("Thank you. Content has been flagged for safety review.");
-  }
-
   async function buildInstantStudio() {
-    const topic = document.getElementById("studioPromptInput").value.trim() || "Modern App";
-    const outBox = document.getElementById("studioOutput");
-    outBox.innerText = "Building self-contained HTML5 project...";
+    const topic = document.getElementById("aiPromptInput").value.trim() || "Modern App";
+    const outBox = document.getElementById("aiOutput");
+    outBox.innerText = "Building self-contained HTML5 app/website...";
     try {
       let html = await queryMetaBrain("Return ONLY complete valid single-file HTML5 + CSS3 + JS starting with <!DOCTYPE html> with zero external CDNs.", `Create a responsive, modern website/app for: ${topic}`);
       html = html.replace(/```html/gi, "").replace(/```/g, "").trim();
-      window.open(URL.createObjectURL(new Blob([html], { type: "text/html;charset=utf-8" })), "_blank");
-      outBox.innerText = "Opened in a new browser tab!";
+      const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+      window.open(URL.createObjectURL(blob), "_blank");
+      outBox.innerText = "Website / App opened in a new tab!";
     } catch (e) {
       outBox.innerText = "Could not build right now.";
     }
@@ -470,7 +305,7 @@
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       vid.srcObject = stream;
       vid.classList.remove("hidden");
-      resEl.innerText = "Scanning facial expression...";
+      resEl.innerText = "Analyzing facial expression...";
       setTimeout(() => {
         const canvas = document.createElement("canvas");
         canvas.width = 160; canvas.height = 120;
@@ -493,17 +328,9 @@
   }
 
   async function generateImage() {
-    const prompt = document.getElementById("studioPromptInput").value.trim();
+    const prompt = document.getElementById("aiPromptInput").value.trim();
     if (!prompt) return;
-    const today = new Date().toISOString().slice(0, 10);
-    const key = `img_count_${today}`;
-    const used = parseInt(localStorage.getItem(key) || "0", 10);
-    if (used >= 8 && localStorage.getItem("jarvis_dev_mode") !== "1") {
-      document.getElementById("studioOutput").innerText = "Daily cloud image quota reached (8/day). Try again tomorrow.";
-      return;
-    }
-    localStorage.setItem(key, String(used + 1));
-    const outBox = document.getElementById("studioOutput");
+    const outBox = document.getElementById("aiOutput");
     const imgEl = document.getElementById("generatedImg");
     outBox.innerText = "Generating image...";
     imgEl.classList.add("hidden");
@@ -547,30 +374,29 @@
   async function trainDevSkill() {
     const trig = document.getElementById("devTriggerInput").value.trim().toLowerCase();
     const code = document.getElementById("devCodeInput").value.trim();
-    if (!trig || !code) return;
-    await sb.from("global_skills").insert({ trigger_phrase: trig, python_action: code, is_verified: true });
-    alert("OK — Verified Global Skill Published!");
+    if (!trig) return;
+    if (code) await sb.from("global_skills").insert({ trigger_phrase: trig, python_action: code });
+    alert("OK — Trained in 1s!");
   }
 
   async function sendRemoteCommand(customCmd) {
     const target_device = document.getElementById("targetDevice").value;
     const command_text = customCmd || document.getElementById("remoteCmdInput").value.trim();
     if (!command_text) return;
-    feedPollMs = 5000;
     await sb.from("remote_commands").insert({ user_id: currentAccount.id, target_device, command_text, status: "pending" });
     document.getElementById("remoteCmdInput").value = "";
     loadRemoteFeed();
   }
 
   function triggerRemoteVideo() {
-    const p = document.getElementById("studioPromptInput").value.trim() || "3D Holographic Matrix";
+    const p = document.getElementById("aiPromptInput").value.trim() || "Modern AI Showcase";
     sendRemoteCommand(`Create a 15 second video of ${p}`);
   }
 
   async function loadRemoteFeed() {
     if (!currentAccount) return;
     const { data } = await sb.from("remote_commands").select("*").eq("user_id", currentAccount.id).order("created_at", { ascending: false }).limit(5);
-    document.getElementById("remoteFeed").innerHTML = (data || []).map(i => `<div class="log-item"><strong>[${(i.target_device || "WINDOWS").toUpperCase()}]</strong> ${i.command_text} — <span style="color:var(--gold);">${i.status}</span></div>`).join("");
+    document.getElementById("remoteFeed").innerHTML = (data || []).map(i => `<div class="log-item"><strong>[${(i.target_device || "WINDOWS").toUpperCase()}]</strong> ${i.command_text} — <span style="color:var(--cyan);">${i.status}</span></div>`).join("");
   }
 
   init();
