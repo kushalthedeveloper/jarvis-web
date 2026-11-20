@@ -3,324 +3,577 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <title>SOVEREIGN // MARK LXXXV</title>
+  <title>SOVEREIGN // Mark LXXXV 3D Hologram Studio</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    * { box-sizing: border-box; font-family: Consolas, 'Segoe UI', monospace; }
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      background: #000000;
-      color: #f8fafc;
+    :root {
+      --bg: #000000;
+      --panel: #06070b;
+      --border: #171c29;
+      --gold: #ffb703;
+      --amber: #f59e0b;
+      --cyan: #00f0ff;
+      --text: #f8fafc;
+      --muted: #94a3b8;
     }
-    .app {
-      max-width: 860px;
-      height: 100vh;
-      margin: 0 auto;
+    * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+    body { margin: 0; background: var(--bg); color: var(--text); min-height: 100vh; }
+    header {
+      background: #040508;
+      border-bottom: 1px solid var(--border);
+      padding: 12px 18px;
       display: flex;
-      flex-direction: column;
-      padding: 12px 16px 16px;
-      gap: 10px;
-    }
-    .stage {
-      display: flex;
-      justify-content: center;
+      justify-content: space-between;
       align-items: center;
-      background: #000000;
-      flex: 0 0 auto;
-    }
-    canvas {
-      background: #000000;
-      display: block;
-    }
-    .chat {
-      flex: 1 1 auto;
-      overflow-y: auto;
-      background: #000000;
-      border: 1px solid #161a24;
-      border-radius: 10px;
-      padding: 12px 14px;
-      font-size: 14px;
-      line-height: 1.5;
-      white-space: pre-wrap;
-    }
-    .msg { margin-bottom: 10px; }
-    .who-you { color: #00f0ff; font-weight: bold; }
-    .who-ai { color: #ffb703; font-weight: bold; }
-    .input-row {
-      flex: 0 0 auto;
-    }
-    input {
-      width: 100%;
-      padding: 12px 14px;
-      background: #050609;
-      color: #ffffff;
-      border: 1px solid #1e2433;
-      border-radius: 10px;
-      font-size: 14px;
-      outline: none;
-    }
-    input:focus { border-color: #ffb703; }
-    .auth-box {
-      max-width: 380px;
-      margin: auto;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
+      flex-wrap: wrap;
       gap: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
     }
-    .auth-btns { display: flex; gap: 8px; }
-    button {
-      flex: 1;
-      padding: 10px 12px;
-      background: #ffb703;
-      color: #000000;
-      border: none;
+    .brand { font-family: Consolas, monospace; font-weight: bold; color: var(--gold); font-size: 15px; }
+    .nav-menus { display: flex; gap: 6px; flex-wrap: wrap; }
+    .nav-btn {
+      background: #0b0e16;
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 7px 12px;
       border-radius: 8px;
+      font-family: Consolas, monospace;
+      font-size: 12px;
       font-weight: bold;
       cursor: pointer;
     }
-    button.alt { background: #101522; color: #f8fafc; border: 1px solid #1e2433; }
+    .nav-btn.active { background: var(--gold); color: #000000; border-color: var(--gold); }
+    .container { max-width: 1120px; margin: 18px auto; padding: 0 14px; }
+    .holo-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 0 18px;
+    }
+    #holoCanvas { width: 320px; height: 280px; background: #000000; }
+    .holo-caption { font-family: Consolas, monospace; color: var(--gold); font-size: 12px; letter-spacing: 1px; }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+    h3 { margin-top: 0; color: var(--gold); font-family: Consolas, monospace; font-size: 15px; }
+    input, select, textarea {
+      width: 100%;
+      padding: 11px 12px;
+      margin: 6px 0 10px;
+      background: #000000;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+    }
+    button.action-btn {
+      background: linear-gradient(135deg, var(--gold), var(--amber));
+      color: #000000;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      font-family: Consolas, monospace;
+      font-size: 12px;
+    }
+    button.secondary-btn {
+      background: #0c1018;
+      color: var(--cyan);
+      border: 1px solid var(--border);
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      font-family: Consolas, monospace;
+      font-size: 12px;
+    }
+    .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .log-item { background: #000000; border-left: 3px solid var(--gold); padding: 10px; margin-top: 8px; border-radius: 8px; font-size: 13px; }
     .hidden { display: none; }
+    img.generated { max-width: 100%; border-radius: 10px; margin-top: 12px; border: 1px solid var(--gold); }
+    video.cam-preview { width: 100%; max-height: 220px; border-radius: 10px; background: #000; margin-top: 8px; }
+    footer { text-align: center; padding: 18px; color: var(--muted); font-size: 12px; }
+    .modal { position: fixed; inset: 0; background: rgba(0,0,0,.88); display: none; align-items: center; justify-content: center; padding: 16px; z-index: 50; }
+    .modal-box { max-width: 560px; background: var(--panel); border: 1px solid var(--gold); border-radius: 14px; padding: 20px; }
   </style>
 </head>
 <body>
-  <div id="authView" class="app">
-    <div class="auth-box">
-      <div class="stage"><canvas id="authCanvas" width="220" height="190"></canvas></div>
-      <input id="userIn" type="text" placeholder="Username" autocomplete="username" />
-      <input id="passIn" type="password" placeholder="Password" autocomplete="current-password" />
-      <div class="auth-btns">
-        <button onclick="login()">LOGIN</button>
-        <button class="alt" onclick="signup()">SIGN UP</button>
+
+<header>
+  <div class="brand">◈ SOVEREIGN // MARK LXXXV</div>
+  <div class="nav-menus" id="mainNav">
+    <button class="nav-btn active" data-menu="CORE" onclick="switchMenu('CORE')">HOLO CORE</button>
+    <button class="nav-btn" data-menu="STUDIO" onclick="switchMenu('STUDIO')">STUDIO</button>
+    <button class="nav-btn" data-menu="TOOLS" onclick="switchMenu('TOOLS')">MOOD & FILES</button>
+    <button class="nav-btn" data-menu="SYNC" onclick="switchMenu('SYNC')">SYNC</button>
+  </div>
+  <div class="btn-row">
+    <button class="secondary-btn" onclick="togglePrivacy(true)">PRIVACY</button>
+    <button class="secondary-btn hidden" id="logoutBtn" onclick="logout()">LOGOUT</button>
+  </div>
+</header>
+
+<div class="container">
+  <div id="authSection" class="card" style="max-width:420px; margin: 36px auto;">
+    <div class="holo-stage" style="padding:4px 0 12px;">
+      <canvas id="authHoloCanvas" width="180" height="150"></canvas>
+    </div>
+    <h3>◈ ENTER MARK LXXXV CORE</h3>
+    <input type="text" id="usernameInput" placeholder="Username (min 3 chars)" autocomplete="username" />
+    <input type="password" id="passwordInput" placeholder="Password (min 6 chars)" autocomplete="current-password" />
+    <div class="btn-row">
+      <button class="action-btn" onclick="login()" style="flex:1;">LOGIN</button>
+      <button class="secondary-btn" onclick="signup()" style="flex:1;">CREATE ACCOUNT</button>
+    </div>
+    <p id="authMsg" style="color:var(--gold); font-size:13px; margin-top:10px;"></p>
+  </div>
+
+  <div id="dashboardSection" class="hidden">
+    <!-- MENU 1: 3D HOLOGRAPHIC CORE & AI CHAT -->
+    <div id="menu-CORE" class="menu-section">
+      <div class="holo-stage">
+        <canvas id="holoCanvas" width="320" height="280"></canvas>
+        <div class="holo-caption" id="holoStatus">3D HOLOGRAPHIC MATRIX // STANDBY</div>
       </div>
-      <div id="authStatus" style="color:#ffb703; font-size:12px; min-height:16px;"></div>
+      <div class="card">
+        <h3>01 // SOVEREIGN NEURAL INTERFACE</h3>
+        <select id="modelSelect">
+          <option value="AUTO">AUTO STAGGERED WAVE (All Frontier Models)</option>
+          <option value="POLLINATIONS">Pollinations Global Multi-Model Mesh</option>
+          <option value="OPENROUTER">OpenRouter Frontier Auto-Router</option>
+          <option value="CLOUDFLARE">Cloudflare Edge Mesh</option>
+        </select>
+        <textarea id="aiPromptInput" rows="3" placeholder="Ask anything, study topics, code, or ideas..."></textarea>
+        <div class="btn-row">
+          <button class="action-btn" onclick="askCloudAI()">ASK SOVEREIGN</button>
+          <button class="secondary-btn" onclick="switchMenu('STUDIO')">OPEN STUDIO MENU</button>
+          <button class="secondary-btn" onclick="switchMenu('TOOLS')">OPEN MOOD & FILES</button>
+        </div>
+        <div id="aiOutput" style="margin-top:12px; font-size:14px; white-space:pre-wrap; line-height:1.5;"></div>
+        <div id="flagBar" class="hidden" style="margin-top:8px;">
+          <button class="secondary-btn" style="font-size:11px; padding:6px 10px;" onclick="flagAIResponse()">⚑ REPORT / FLAG AI CONTENT</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MENU 2: STUDIO (WEBSITES, APPS, IMAGES, PC VIDEO) -->
+    <div id="menu-STUDIO" class="menu-section hidden">
+      <div class="card">
+        <h3>02 // WEBSITE, WEB APP, HD IMAGE & PC VIDEO STUDIO</h3>
+        <textarea id="studioPromptInput" rows="2" placeholder="Describe a website, app, 3D game concept, image, or video..."></textarea>
+        <div class="btn-row">
+          <button class="action-btn" onclick="buildInstantStudio()">BUILD WEBSITE / APP</button>
+          <button class="secondary-btn" onclick="generateImage()">GENERATE HD IMAGE</button>
+          <button class="secondary-btn" onclick="triggerRemoteVideo()">RENDER VIDEO ON PC</button>
+        </div>
+        <div id="studioOutput" style="margin-top:12px; font-size:13px; color:var(--gold);"></div>
+        <img id="generatedImg" class="generated hidden" />
+      </div>
+    </div>
+
+    <!-- MENU 3: CAMERA MOOD & FILE EDITOR -->
+    <div id="menu-TOOLS" class="menu-section hidden">
+      <div class="card">
+        <h3>03 // CAMERA MOOD -> REELS & SONGS</h3>
+        <p style="color:var(--muted); font-size:13px;">Camera starts only when you click below.</p>
+        <button class="action-btn" onclick="scanCameraMood()">SCAN MY MOOD NOW</button>
+        <video id="moodVideo" class="cam-preview hidden" autoplay playsinline muted></video>
+        <div id="moodResult" style="margin-top:10px; font-size:14px; color:var(--gold);"></div>
+      </div>
+
+      <div class="card">
+        <h3>04 // FILE UPLOAD & AI EDITOR</h3>
+        <input type="file" id="fileUploadInput" onchange="handleFileUpload(event)" />
+        <input type="text" id="fileInstructionInput" placeholder="What should be edited or extracted from this file?" />
+        <button class="action-btn" onclick="modifyUploadedFile()">EDIT & DOWNLOAD FILE</button>
+        <pre id="filePreviewBox" style="background:#000000; padding:10px; border-radius:8px; max-height:140px; overflow:auto; font-size:12px; color:var(--cyan); margin-top:10px;">No file selected.</pre>
+      </div>
+    </div>
+
+    <!-- MENU 4: DEVICE SYNC & DEVELOPER TRAINER -->
+    <div id="menu-SYNC" class="menu-section hidden">
+      <div class="card">
+        <h3>05 // LIVE PC & MOBILE COMMAND SYNC</h3>
+        <select id="targetDevice">
+          <option value="windows">Windows PC</option>
+          <option value="android">Android Mobile</option>
+        </select>
+        <input type="text" id="remoteCmdInput" placeholder="Send command to paired device..." />
+        <button class="action-btn" onclick="sendRemoteCommand()">SEND COMMAND</button>
+        <div id="remoteFeed" style="margin-top:10px;"></div>
+      </div>
+
+      <div id="devTrainerCard" class="card hidden" style="border-color:var(--gold);">
+        <h3>◈ DEVELOPER 1-SECOND SKILL TRAINER</h3>
+        <input type="text" id="devTriggerInput" placeholder="Trigger phrase" />
+        <input type="text" id="devReplyInput" placeholder="Instant answer" />
+        <input type="text" id="devCodeInput" placeholder="Optional Python action code" />
+        <button class="action-btn" onclick="trainDevSkill()">PUBLISH VERIFIED SKILL</button>
+      </div>
     </div>
   </div>
+</div>
 
-  <div id="mainView" class="app hidden">
-    <div class="stage">
-      <canvas id="coreCanvas" width="320" height="240"></canvas>
-    </div>
-    <div id="chatLog" class="chat"></div>
-    <div class="input-row">
-      <input id="cmdIn" type="text" placeholder="Type a command..." autocomplete="off" />
-    </div>
+<footer>
+  SOVEREIGN // MARK LXXXV • <a href="#" style="color:var(--gold);" onclick="togglePrivacy(true);return false;">Privacy Policy & AI Safety</a>
+</footer>
+
+<div id="privacyModal" class="modal">
+  <div class="modal-box">
+    <h3>PRIVACY POLICY & AI SAFETY</h3>
+    <p style="font-size:13px; color:#cbd5e1; line-height:1.5;">
+      Sovereign Mark LXXXV uses salted PBKDF2-SHA256 authentication without requiring an email address. Camera streams are processed locally only when you click Scan My Mood and are never uploaded or stored. You can report any AI response anytime using the Report button.
+    </p>
+    <button class="action-btn" onclick="togglePrivacy(false)">CLOSE</button>
   </div>
+</div>
 
-  <script>
-    const CLOUD_GATEWAYS = [
-      "https://jarvis-neural-gateway.gattuchowdappa121.workers.dev",
-      "https://jarvis-neural-gateway.gattukushal68.workers.dev",
-      "https://jarvis-neural-gateway-beta.gattukushal68.workers.dev"
+<script>
+  const CLOUD_GATEWAYS = [
+    "https://jarvis-neural-gateway.gattuchowdappa121.workers.dev",
+    "https://jarvis-neural-gateway.gattukushal68.workers.dev",
+    "https://jarvis-neural-gateway-beta.gattukushal68.workers.dev"
+  ];
+  const SUPABASE_URL = "https://eoyftbixuwybuykjgrhr.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_6vpris-KE1NpaguLqvt6zw_l5OnvrsE";
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  let currentAccount = null;
+  let uploadedFileName = "";
+  let uploadedFileContent = "";
+  let lastBurstTs = 0;
+  let feedPollMs = 8000;
+  let holoPhase = 0;
+
+  function draw3DHologram(canvasId, phase) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    const w = canvas.width, h = canvas.height, cx = w / 2, cy = h / 2;
+    ctx.fillStyle = "#000000";
+    ctx.fillRect(0, 0, w, h);
+
+    const tilt = 0.45 + 0.12 * Math.sin(phase * 0.7);
+    const rings = [
+      { r: Math.min(w, h) * 0.38, yaw: 0.4, col: "#ffb703" },
+      { r: Math.min(w, h) * 0.30, yaw: -0.6, col: "#f59e0b" },
+      { r: Math.min(w, h) * 0.22, yaw: 0.9, col: "#00f0ff" },
     ];
-    const SUPABASE_URL = "https://eoyftbixuwybuykjgrhr.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_6vpris-KE1NpaguLqvt6zw_l5OnvrsE";
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    let account = null;
-    let phase = 0;
-    let activePulse = false;
-    let lastBurst = 0;
-
-    function renderCore(canvasId) {
-      const c = document.getElementById(canvasId);
-      if (!c) return;
-      const ctx = c.getContext("2d");
-      const w = c.width, h = c.height, cx = w / 2, cy = h / 2;
-      ctx.fillStyle = "#000000";
-      ctx.fillRect(0, 0, w, h);
-
-      const tilt = 0.42 + 0.14 * Math.sin(phase * 0.75);
-      const baseR = Math.min(w, h) * 0.36;
-      const rings = [
-        { r: baseR, yaw: 0.35, col: "#ffb703" },
-        { r: baseR * 0.78, yaw: -0.55, col: "#f59e0b" },
-        { r: baseR * 0.58, yaw: 0.85, col: "#00f0ff" }
-      ];
-
-      for (const rg of rings) {
-        ctx.beginPath();
-        for (let i = 0; i <= 60; i++) {
-          const a = (i / 60) * Math.PI * 2 + phase * rg.yaw * 2.1;
-          const x3 = rg.r * Math.cos(a);
-          const y3 = rg.r * Math.sin(a) * Math.cos(tilt);
-          const z3 = rg.r * Math.sin(a) * Math.sin(tilt);
-          const p = 260 / (260 - z3 * 0.55);
-          const sx = cx + x3 * p, sy = cy + y3 * p;
-          if (i === 0) ctx.moveTo(sx, sy); else ctx.lineTo(sx, sy);
-        }
-        ctx.strokeStyle = rg.col;
-        ctx.lineWidth = 1.6;
-        ctx.stroke();
-      }
-
-      for (let k = 0; k < 28; k++) {
-        const lon = k * 2.39996 + phase * (0.6 + (k % 4) * 0.22);
-        const lat = ((k * 137.5) % 150 - 75) * Math.PI / 180;
-        const rad = baseR * 0.72;
-        const x3 = rad * Math.cos(lat) * Math.cos(lon);
-        const y3 = rad * Math.sin(lat) * 0.85;
-        const z3 = rad * Math.cos(lat) * Math.sin(lon);
-        const p = 250 / (250 - z3);
-        ctx.fillStyle = k % 3 === 0 ? "#00f0ff" : "#ffd166";
-        ctx.beginPath();
-        ctx.arc(cx + x3 * p, cy + y3 * p, Math.max(1.2, 2.4 * p), 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      const coreR = (activePulse ? 18 : 15) + 3 * Math.sin(phase * 3.2);
+    for (const rg of rings) {
       ctx.beginPath();
-      ctx.arc(cx, cy, coreR, 0, Math.PI * 2);
-      ctx.fillStyle = "#191002";
-      ctx.fill();
-      ctx.strokeStyle = "#ffb703";
-      ctx.lineWidth = 2;
+      for (let i = 0; i <= 64; i++) {
+        const a = (i / 64) * Math.PI * 2 + phase * rg.yaw * 2.0;
+        const x3 = rg.r * Math.cos(a);
+        const y3 = rg.r * Math.sin(a) * Math.cos(tilt);
+        const z3 = rg.r * Math.sin(a) * Math.sin(tilt);
+        const p = 260 / (260 - z3 * 0.6);
+        const sx = cx + x3 * p, sy = cy + y3 * p;
+        if (i === 0) ctx.moveTo(sx, sy); else ctx.lineTo(sx, sy);
+      }
+      ctx.strokeStyle = rg.col;
+      ctx.lineWidth = 1.6;
       ctx.stroke();
     }
 
-    setInterval(() => {
-      phase += activePulse ? 0.055 : 0.025;
-      renderCore("coreCanvas");
-      renderCore("authCanvas");
-    }, 33);
-
-    function appendMsg(who, text) {
-      const log = document.getElementById("chatLog");
-      const div = document.createElement("div");
-      div.className = "msg";
-      const span = document.createElement("span");
-      span.className = who === "YOU" ? "who-you" : "who-ai";
-      span.textContent = `[${who}] `;
-      div.appendChild(span);
-      div.appendChild(document.createTextNode(text));
-      log.appendChild(div);
-      log.scrollTop = log.scrollHeight;
+    for (let k = 0; k < 28; k++) {
+      const lon = k * 2.39996 + phase * (0.6 + (k % 4) * 0.2);
+      const lat = ((k * 137.5) % 150 - 75) * Math.PI / 180;
+      const rad = Math.min(w, h) * 0.26;
+      const x3 = rad * Math.cos(lat) * Math.cos(lon);
+      const y3 = rad * Math.sin(lat) * 0.85;
+      const z3 = rad * Math.cos(lat) * Math.sin(lon);
+      const p = 250 / (250 - z3);
+      ctx.fillStyle = k % 3 === 0 ? "#00f0ff" : "#ffd166";
+      ctx.beginPath();
+      ctx.arc(cx + x3 * p, cy + y3 * p, Math.max(1.2, 2.4 * p), 0, Math.PI * 2);
+      ctx.fill();
     }
 
-    function bufToHex(buf) {
-      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
-    }
+    const coreR = 16 + 3 * Math.sin(phase * 3.0);
+    ctx.beginPath();
+    ctx.arc(cx, cy, coreR, 0, Math.PI * 2);
+    ctx.fillStyle = "#1b1202";
+    ctx.fill();
+    ctx.strokeStyle = "#ffb703";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
 
-    async function derivePbkdf2(password, saltHex = null) {
-      const salt = saltHex
-        ? new Uint8Array(saltHex.match(/.{2}/g).map(h => parseInt(h, 16)))
-        : crypto.getRandomValues(new Uint8Array(16));
-      const keyMat = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveBits"]);
-      const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt, iterations: 120000, hash: "SHA-256" }, keyMat, 256);
-      return `pbkdf2$120000$${bufToHex(salt)}$${bufToHex(bits)}`;
-    }
+  setInterval(() => {
+    holoPhase += 0.035;
+    draw3DHologram("holoCanvas", holoPhase);
+    draw3DHologram("authHoloCanvas", holoPhase);
+  }, 35);
 
-    async function signup() {
-      const username = document.getElementById("userIn").value.trim().toLowerCase().replace(/[^a-z0-9._-]/g, "");
-      const password = document.getElementById("passIn").value.trim();
-      const status = document.getElementById("authStatus");
-      if (username.length < 3 || password.length < 6) { status.textContent = "Username (3+) and password (6+) required."; return; }
-      const password_hash = await derivePbkdf2(password);
-      const { data: ex } = await sb.from("jarvis_accounts").select("id").eq("username", username).maybeSingle();
-      if (ex) { status.textContent = "Account exists. Use LOGIN."; return; }
-      const { data, error } = await sb.from("jarvis_accounts").insert({ username, password_hash, assistant_name: "SOVEREIGN", active_mode: "GOD" }).select().single();
-      if (error) { status.textContent = error.message; return; }
-      account = data;
-      localStorage.setItem("jarvis_account_session", JSON.stringify(account));
-      enterMain();
-    }
-
-    async function login() {
-      const username = document.getElementById("userIn").value.trim().toLowerCase().replace(/[^a-z0-9._-]/g, "");
-      const password = document.getElementById("passIn").value.trim();
-      const status = document.getElementById("authStatus");
-      if (!username || !password) { status.textContent = "Enter username and password."; return; }
-      const { data } = await sb.from("jarvis_accounts").select("*").eq("username", username).maybeSingle();
-      if (!data || !data.password_hash.startsWith("pbkdf2$")) { status.textContent = "Invalid credentials."; return; }
-      const ok = (await derivePbkdf2(password, data.password_hash.split("$")[2])) === data.password_hash;
-      if (!ok) { status.textContent = "Invalid credentials."; return; }
-      account = data;
-      localStorage.setItem("jarvis_account_session", JSON.stringify(account));
-      enterMain();
-    }
-
-    function enterMain() {
-      document.getElementById("authView").classList.add("hidden");
-      document.getElementById("mainView").classList.remove("hidden");
-      appendMsg("SOVEREIGN", "Online.");
-      document.getElementById("cmdIn").focus();
-    }
-
-    async function askAI(sysPrompt, userPrompt) {
-      const dt = Date.now() - lastBurst;
-      if (dt < 1400) await new Promise(r => setTimeout(r, 1400 - dt));
-      lastBurst = Date.now();
-      return await Promise.any([
-        fetch(`https://text.pollinations.ai/${encodeURIComponent(sysPrompt + "\n" + userPrompt)}`).then(async r => { const t = await r.text(); if (!t) throw 0; return t; }),
-        fetch("https://openrouter.ai/api/v1/chat/completions", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ model: "openrouter/free", messages: [{ role: "system", content: sysPrompt }, { role: "user", content: userPrompt }] })
-        }).then(async r => { const d = await r.json(); return d.choices[0].message.content; }),
-        fetch(`${CLOUD_GATEWAYS[0]}/think`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ system_prompt: sysPrompt, user_prompt: userPrompt })
-        }).then(async r => { const d = await r.json(); if (!d.reply) throw 0; return d.reply; })
-      ]);
-    }
-
-    document.getElementById("cmdIn").addEventListener("keydown", async (e) => {
-      if (e.key !== "Enter") return;
-      const cmd = e.target.value.trim();
-      if (!cmd) return;
-      e.target.value = "";
-      appendMsg("YOU", cmd);
-
-      if (cmd === "kushi24112010" || cmd === "362025") {
-        appendMsg("SOVEREIGN", "OK");
-        return;
-      }
-
-      activePulse = true;
-      try {
-        if (/^(create|make|build|generate)\s+(a\s+|an\s+)?(website|web app|app|3d game|game|design|template|study guide)/i.test(cmd)) {
-          let html = await askAI("Return ONLY valid single-file HTML5 + CSS3 + JS starting with <!DOCTYPE html> with zero external CDNs.", cmd);
-          html = html.replace(/```html/gi, "").replace(/```/g, "").trim();
-          window.open(URL.createObjectURL(new Blob([html], { type: "text/html;charset=utf-8" })), "_blank");
-          appendMsg("SOVEREIGN", "Opened in a new tab.");
-          return;
-        }
-        if (/^(create|make|generate|draw)\s+(a\s+|an\s+)?(image|picture|photo|art|wallpaper)/i.test(cmd)) {
-          for (const gw of [...CLOUD_GATEWAYS].sort(() => Math.random() - 0.5)) {
-            try {
-              const res = await fetch(`${gw}/imagine`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ prompt: cmd }) });
-              if (res.ok) {
-                const url = URL.createObjectURL(await res.blob());
-                window.open(url, "_blank");
-                appendMsg("SOVEREIGN", "Image opened.");
-                return;
-              }
-            } catch (err) {}
-          }
-        }
-        if (account && /^(video|render|open |close |lock |screenshot|mood)/i.test(cmd)) {
-          await sb.from("remote_commands").insert({ user_id: account.id, target_device: "windows", command_text: cmd, status: "pending" });
-          appendMsg("SOVEREIGN", "Queued.");
-          return;
-        }
-        const reply = await askAI("You are Sovereign, a concise and helpful AI assistant. Reply in the user's language.", cmd);
-        appendMsg("SOVEREIGN", reply || "Ready.");
-      } catch (err) {
-        appendMsg("SOVEREIGN", "Ready.");
-      } finally {
-        activePulse = false;
-      }
+  function switchMenu(menuKey) {
+    document.querySelectorAll(".menu-section").forEach(el => el.classList.add("hidden"));
+    const target = document.getElementById(`menu-${menuKey}`);
+    if (target) target.classList.remove("hidden");
+    document.querySelectorAll(".nav-btn").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.menu === menuKey);
     });
+  }
 
-    (() => {
+  function togglePrivacy(show) { document.getElementById("privacyModal").style.display = show ? "flex" : "none"; }
+  function cleanUsername(raw) { return raw.trim().toLowerCase().replace(/[^a-z0-9._-]/g, ""); }
+  function bufToHex(buf) { return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join(""); }
+
+  async function legacySha256(str) { return bufToHex(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str))); }
+
+  async function deriveSaltedPbkdf2(password, saltHex = null) {
+    const salt = saltHex ? new Uint8Array(saltHex.match(/.{2}/g).map(h => parseInt(h, 16))) : crypto.getRandomValues(new Uint8Array(16));
+    const keyMat = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveBits"]);
+    const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt, iterations: 120000, hash: "SHA-256" }, keyMat, 256);
+    return `pbkdf2$120000$${bufToHex(salt)}$${bufToHex(bits)}`;
+  }
+
+  function init() {
+    const saved = localStorage.getItem("jarvis_account_session");
+    if (saved) {
       try {
-        const saved = JSON.parse(localStorage.getItem("jarvis_account_session") || "null");
-        if (saved && saved.id) { account = saved; enterMain(); }
-      } catch (err) {}
-    })();
-  </script>
+        currentAccount = JSON.parse(saved);
+        if (currentAccount && currentAccount.id) showDashboard();
+      } catch (e) {}
+    }
+    if (localStorage.getItem("jarvis_dev_mode") === "1") document.getElementById("devTrainerCard").classList.remove("hidden");
+  }
+
+  async function signup() {
+    const username = cleanUsername(document.getElementById("usernameInput").value);
+    const password = document.getElementById("passwordInput").value.trim();
+    const msgEl = document.getElementById("authMsg");
+    if (username.length < 3 || password.length < 6) { msgEl.innerText = "Username (min 3) and password (min 6) required."; return; }
+    const password_hash = await deriveSaltedPbkdf2(password);
+    const { data: existing } = await sb.from("jarvis_accounts").select("id").eq("username", username).maybeSingle();
+    if (existing) { msgEl.innerText = "Username taken. Choose another or click LOGIN."; return; }
+    const { data, error } = await sb.from("jarvis_accounts").insert({ username, password_hash, assistant_name: "SOVEREIGN", active_mode: "GOD" }).select().single();
+    if (error) { msgEl.innerText = error.message; return; }
+    currentAccount = data;
+    localStorage.setItem("jarvis_account_session", JSON.stringify(currentAccount));
+    showDashboard();
+  }
+
+  async function login() {
+    const username = cleanUsername(document.getElementById("usernameInput").value);
+    const password = document.getElementById("passwordInput").value.trim();
+    const msgEl = document.getElementById("authMsg");
+    if (!username || !password) { msgEl.innerText = "Enter username and password."; return; }
+    const { data, error } = await sb.from("jarvis_accounts").select("*").eq("username", username).maybeSingle();
+    if (error || !data) { msgEl.innerText = "Invalid username or password."; return; }
+    const stored = data.password_hash || "";
+    let valid = false;
+    if (stored.startsWith("pbkdf2$")) {
+      valid = (await deriveSaltedPbkdf2(password, stored.split("$")[2])) === stored;
+    } else {
+      valid = (await legacySha256(`JARVIS_100L::${username}::${password}`)) === stored;
+      if (valid) await sb.from("jarvis_accounts").update({ password_hash: await deriveSaltedPbkdf2(password) }).eq("id", data.id);
+    }
+    if (!valid) { msgEl.innerText = "Invalid username or password."; return; }
+    currentAccount = data;
+    localStorage.setItem("jarvis_account_session", JSON.stringify(currentAccount));
+    showDashboard();
+  }
+
+  function logout() { localStorage.removeItem("jarvis_account_session"); location.reload(); }
+
+  function showDashboard() {
+    document.getElementById("authSection").classList.add("hidden");
+    document.getElementById("dashboardSection").classList.remove("hidden");
+    document.getElementById("logoutBtn").classList.remove("hidden");
+    scheduleFeedPoll();
+  }
+
+  async function scheduleFeedPoll() {
+    await loadRemoteFeed();
+    feedPollMs = Math.min(40000, feedPollMs + 4000);
+    setTimeout(scheduleFeedPoll, feedPollMs);
+  }
+
+  async function queryMetaBrain(sysPrompt, userPrompt) {
+    const now = Date.now();
+    if (now - lastBurstTs < 1400) await new Promise(r => setTimeout(r, 1400));
+    lastBurstTs = Date.now();
+    const mode = document.getElementById("modelSelect").value;
+    const wave1 = [];
+    if (mode === "AUTO" || mode === "POLLINATIONS") {
+      wave1.push(fetch(`https://text.pollinations.ai/${encodeURIComponent(sysPrompt + "\n" + userPrompt)}`).then(async r => { const t = await r.text(); if (!t) throw 0; return t; }));
+    }
+    if (mode === "AUTO" || mode === "OPENROUTER") {
+      wave1.push(fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ model: "openrouter/free", messages: [{ role: "system", content: sysPrompt }, { role: "user", content: userPrompt }] })
+      }).then(async r => { const d = await r.json(); return d.choices[0].message.content; }));
+    }
+    if (mode === "CLOUDFLARE") {
+      wave1.push(fetch(`${CLOUD_GATEWAYS[0]}/think`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ system_prompt: sysPrompt, user_prompt: userPrompt })
+      }).then(async r => { const d = await r.json(); if (!d.reply) throw 0; return d.reply; }));
+    }
+    return await Promise.any(wave1);
+  }
+
+  async function askCloudAI() {
+    const prompt = document.getElementById("aiPromptInput").value.trim();
+    if (!prompt) return;
+    if (prompt === "kushi24112010") { localStorage.setItem("jarvis_dev_mode", "1"); document.getElementById("devTrainerCard").classList.remove("hidden"); document.getElementById("aiPromptInput").value = ""; alert("OK"); return; }
+    if (prompt === "362025") { document.getElementById("aiPromptInput").value = ""; alert("OK"); return; }
+    const outBox = document.getElementById("aiOutput");
+    const statusEl = document.getElementById("holoStatus");
+    outBox.innerText = "Processing...";
+    statusEl.innerText = "3D HOLOGRAPHIC MATRIX // THINKING";
+    try {
+      outBox.innerText = await queryMetaBrain("You are Sovereign AI, an ultra-fast assistant for work, studies, coding, and design. Reply in the user's language.", prompt);
+      document.getElementById("flagBar").classList.remove("hidden");
+    } catch (e) {
+      outBox.innerText = "Ready for your next request.";
+    } finally {
+      statusEl.innerText = "3D HOLOGRAPHIC MATRIX // STANDBY";
+    }
+  }
+
+  async function flagAIResponse() {
+    const flagged_text = document.getElementById("aiOutput").innerText.slice(0, 1000);
+    await sb.from("ai_reports").insert({ user_id: currentAccount ? currentAccount.id : null, flagged_text, reason: "User flagged via Web/Mobile UI" });
+    alert("Thank you. Content has been flagged for safety review.");
+  }
+
+  async function buildInstantStudio() {
+    const topic = document.getElementById("studioPromptInput").value.trim() || "Modern App";
+    const outBox = document.getElementById("studioOutput");
+    outBox.innerText = "Building self-contained HTML5 project...";
+    try {
+      let html = await queryMetaBrain("Return ONLY complete valid single-file HTML5 + CSS3 + JS starting with <!DOCTYPE html> with zero external CDNs.", `Create a responsive, modern website/app for: ${topic}`);
+      html = html.replace(/```html/gi, "").replace(/```/g, "").trim();
+      window.open(URL.createObjectURL(new Blob([html], { type: "text/html;charset=utf-8" })), "_blank");
+      outBox.innerText = "Opened in a new browser tab!";
+    } catch (e) {
+      outBox.innerText = "Could not build right now.";
+    }
+  }
+
+  async function scanCameraMood() {
+    const vid = document.getElementById("moodVideo");
+    const resEl = document.getElementById("moodResult");
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      vid.srcObject = stream;
+      vid.classList.remove("hidden");
+      resEl.innerText = "Scanning facial expression...";
+      setTimeout(() => {
+        const canvas = document.createElement("canvas");
+        canvas.width = 160; canvas.height = 120;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(vid, 0, 0, 160, 120);
+        const data = ctx.getImageData(0, 0, 160, 120).data;
+        let sum = 0;
+        for (let i = 0; i < data.length; i += 4) sum += (data[i] + data[i+1] + data[i+2]) / 3;
+        const avg = sum / (data.length / 4);
+        stream.getTracks().forEach(t => t.stop());
+        vid.classList.add("hidden");
+        const mood = avg > 115 ? "HAPPY & ENERGETIC" : (avg > 75 ? "FOCUSED & CHILL" : "CALM & RELAXED");
+        const q = avg > 115 ? "feel+good+upbeat+songs+and+reels" : (avg > 75 ? "chill+lofi+study+work+music" : "soothing+peaceful+acoustic+songs");
+        resEl.innerText = `Mood: ${mood} — Opening matching songs & reels!`;
+        window.open(`https://www.youtube.com/results?search_query=${q}`, "_blank");
+      }, 1400);
+    } catch (e) {
+      resEl.innerText = "Camera permission needed to scan mood.";
+    }
+  }
+
+  async function generateImage() {
+    const prompt = document.getElementById("studioPromptInput").value.trim();
+    if (!prompt) return;
+    const today = new Date().toISOString().slice(0, 10);
+    const key = `img_count_${today}`;
+    const used = parseInt(localStorage.getItem(key) || "0", 10);
+    if (used >= 8 && localStorage.getItem("jarvis_dev_mode") !== "1") {
+      document.getElementById("studioOutput").innerText = "Daily cloud image quota reached (8/day). Try again tomorrow.";
+      return;
+    }
+    localStorage.setItem(key, String(used + 1));
+    const outBox = document.getElementById("studioOutput");
+    const imgEl = document.getElementById("generatedImg");
+    outBox.innerText = "Generating image...";
+    imgEl.classList.add("hidden");
+    for (const gw of [...CLOUD_GATEWAYS].sort(() => Math.random() - 0.5)) {
+      try {
+        const res = await fetch(`${gw}/imagine`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ prompt }) });
+        if (res.ok) {
+          imgEl.src = URL.createObjectURL(await res.blob());
+          imgEl.classList.remove("hidden");
+          outBox.innerText = "";
+          return;
+        }
+      } catch (e) {}
+    }
+    outBox.innerText = "Image service busy.";
+  }
+
+  function handleFileUpload(ev) {
+    const file = ev.target.files[0];
+    if (!file) return;
+    uploadedFileName = file.name;
+    const reader = new FileReader();
+    reader.onload = e => { uploadedFileContent = e.target.result; document.getElementById("filePreviewBox").innerText = uploadedFileContent.slice(0, 1200); };
+    reader.readAsText(file);
+  }
+
+  async function modifyUploadedFile() {
+    const instr = document.getElementById("fileInstructionInput").value.trim();
+    if (!uploadedFileContent || !instr) return;
+    const preview = document.getElementById("filePreviewBox");
+    preview.innerText = "Editing file...";
+    let modified = await queryMetaBrain("Return ONLY the updated file content.", `Instruction: ${instr}\nContent:\n${uploadedFileContent.slice(0, 14000)}`);
+    modified = modified.replace(/```[a-z]*\n?/gi, "").replace(/```/g, "").trim();
+    preview.innerText = modified.slice(0, 1200);
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([modified], { type: "text/plain;charset=utf-8" }));
+    a.download = `edited_${uploadedFileName}`;
+    a.click();
+  }
+
+  async function trainDevSkill() {
+    const trig = document.getElementById("devTriggerInput").value.trim().toLowerCase();
+    const code = document.getElementById("devCodeInput").value.trim();
+    if (!trig || !code) return;
+    await sb.from("global_skills").insert({ trigger_phrase: trig, python_action: code, is_verified: true });
+    alert("OK — Verified Global Skill Published!");
+  }
+
+  async function sendRemoteCommand(customCmd) {
+    const target_device = document.getElementById("targetDevice").value;
+    const command_text = customCmd || document.getElementById("remoteCmdInput").value.trim();
+    if (!command_text) return;
+    feedPollMs = 5000;
+    await sb.from("remote_commands").insert({ user_id: currentAccount.id, target_device, command_text, status: "pending" });
+    document.getElementById("remoteCmdInput").value = "";
+    loadRemoteFeed();
+  }
+
+  function triggerRemoteVideo() {
+    const p = document.getElementById("studioPromptInput").value.trim() || "3D Holographic Matrix";
+    sendRemoteCommand(`Create a 15 second video of ${p}`);
+  }
+
+  async function loadRemoteFeed() {
+    if (!currentAccount) return;
+    const { data } = await sb.from("remote_commands").select("*").eq("user_id", currentAccount.id).order("created_at", { ascending: false }).limit(5);
+    document.getElementById("remoteFeed").innerHTML = (data || []).map(i => `<div class="log-item"><strong>[${(i.target_device || "WINDOWS").toUpperCase()}]</strong> ${i.command_text} — <span style="color:var(--gold);">${i.status}</span></div>`).join("");
+  }
+
+  init();
+</script>
 </body>
 </html>
