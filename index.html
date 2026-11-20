@@ -3,395 +3,324 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <title>JARVIS // Universal AI Studio</title>
+  <title>SOVEREIGN // MARK LXXXV</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    :root {
-      --bg: #050811;
-      --panel: #090e1c;
-      --border: #16243d;
-      --emerald: #10b981;
-      --emerald-bright: #34d399;
-      --cyan: #38bdf8;
-      --text: #f8fafc;
-      --muted: #94a3b8;
+    * { box-sizing: border-box; font-family: Consolas, 'Segoe UI', monospace; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #000000;
+      color: #f8fafc;
     }
-    * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
-    body { margin: 0; background: var(--bg); color: var(--text); min-height: 100vh; }
-    header {
-      background: var(--panel);
-      border-bottom: 1px solid var(--border);
-      padding: 14px 20px;
+    .app {
+      max-width: 860px;
+      height: 100vh;
+      margin: 0 auto;
       display: flex;
-      justify-content: space-between;
+      flex-direction: column;
+      padding: 12px 16px 16px;
+      gap: 10px;
+    }
+    .stage {
+      display: flex;
+      justify-content: center;
       align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 20;
+      background: #000000;
+      flex: 0 0 auto;
     }
-    .brand { font-family: Consolas, monospace; font-weight: bold; color: var(--emerald-bright); font-size: 16px; }
-    .container { max-width: 1140px; margin: 18px auto; padding: 0 14px; }
-    .card {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 18px;
-      margin-bottom: 16px;
+    canvas {
+      background: #000000;
+      display: block;
     }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
-    h3 { margin-top: 0; color: var(--emerald-bright); font-family: Consolas, monospace; font-size: 15px; }
-    input, select, textarea {
-      width: 100%;
-      padding: 11px 12px;
-      margin: 6px 0 10px;
-      background: var(--bg);
-      border: 1px solid #1e293b;
+    .chat {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      background: #000000;
+      border: 1px solid #161a24;
       border-radius: 10px;
-      color: var(--text);
+      padding: 12px 14px;
+      font-size: 14px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+    .msg { margin-bottom: 10px; }
+    .who-you { color: #00f0ff; font-weight: bold; }
+    .who-ai { color: #ffb703; font-weight: bold; }
+    .input-row {
+      flex: 0 0 auto;
+    }
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      background: #050609;
+      color: #ffffff;
+      border: 1px solid #1e2433;
+      border-radius: 10px;
       font-size: 14px;
       outline: none;
     }
-    input:focus, textarea:focus, select:focus { border-color: var(--emerald); }
+    input:focus { border-color: #ffb703; }
+    .auth-box {
+      max-width: 380px;
+      margin: auto;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .auth-btns { display: flex; gap: 8px; }
     button {
-      background: linear-gradient(135deg, var(--emerald), #059669);
-      color: #030712;
+      flex: 1;
+      padding: 10px 12px;
+      background: #ffb703;
+      color: #000000;
       border: none;
-      padding: 11px 16px;
-      border-radius: 10px;
+      border-radius: 8px;
       font-weight: bold;
       cursor: pointer;
-      font-family: Consolas, monospace;
-      font-size: 13px;
     }
-    button.cyan { background: linear-gradient(135deg, var(--cyan), #0284c7); color: #030712; }
-    button.secondary { background: #16243d; color: #cbd5e1; }
-    .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
-    .log-item { background: var(--bg); border-left: 3px solid var(--emerald); padding: 10px; margin-top: 8px; border-radius: 8px; font-size: 13px; }
+    button.alt { background: #101522; color: #f8fafc; border: 1px solid #1e2433; }
     .hidden { display: none; }
-    img.generated { max-width: 100%; border-radius: 10px; margin-top: 12px; border: 1px solid var(--emerald); }
-    video.cam-preview { width: 100%; max-height: 220px; border-radius: 10px; background: #000; margin-top: 8px; }
-    @media (max-width: 600px) {
-      header { padding: 12px 14px; }
-      .brand { font-size: 14px; }
-      button { width: 100%; }
-    }
   </style>
 </head>
 <body>
-
-<header>
-  <div class="brand">◈ JARVIS // UNIVERSAL AI STUDIO</div>
-  <button class="secondary hidden" id="logoutBtn" onclick="logout()">LOGOUT</button>
-</header>
-
-<div class="container">
-  <div id="authSection" class="card" style="max-width:420px; margin: 40px auto;">
-    <h3>◈ SIGN IN TO JARVIS</h3>
-    <input type="text" id="usernameInput" placeholder="Username" autocomplete="username" />
-    <input type="password" id="passwordInput" placeholder="Password" autocomplete="current-password" />
-    <div class="btn-row">
-      <button onclick="login()" style="flex:1;">LOGIN</button>
-      <button class="cyan" onclick="signup()" style="flex:1;">CREATE ACCOUNT</button>
-    </div>
-    <p id="authMsg" style="color:var(--cyan); font-size:13px; margin-top:10px;"></p>
-  </div>
-
-  <div id="dashboardSection" class="hidden">
-    <div class="grid">
-      <div class="card">
-        <h3>01 // ULTRA-FAST AI, WEBSITES, APPS & STUDY</h3>
-        <select id="modelSelect">
-          <option value="AUTO">AUTO FAST-RACE (All AI Models)</option>
-          <option value="OPENROUTER">OpenRouter Free Mesh (Nemotron / Gemma / Qwen)</option>
-          <option value="CLOUDFLARE">Cloudflare Edge Mesh (DeepSeek / GLM / Llama)</option>
-        </select>
-        <textarea id="aiPromptInput" rows="3" placeholder="Ask anything, study help, or describe a website, app, design, image, or video..."></textarea>
-        <div class="btn-row">
-          <button onclick="askCloudAI()">ASK JARVIS</button>
-          <button class="cyan" onclick="buildInstantStudio()">BUILD WEBSITE / APP</button>
-          <button class="secondary" onclick="generateImage()">HD IMAGE</button>
-          <button class="secondary" onclick="triggerRemoteVideo()">VIDEO ON PC</button>
-        </div>
-        <div id="aiOutput" style="margin-top:12px; font-size:14px; white-space:pre-wrap; line-height:1.5;"></div>
-        <img id="generatedImg" class="generated hidden" />
+  <div id="authView" class="app">
+    <div class="auth-box">
+      <div class="stage"><canvas id="authCanvas" width="220" height="190"></canvas></div>
+      <input id="userIn" type="text" placeholder="Username" autocomplete="username" />
+      <input id="passIn" type="password" placeholder="Password" autocomplete="current-password" />
+      <div class="auth-btns">
+        <button onclick="login()">LOGIN</button>
+        <button class="alt" onclick="signup()">SIGN UP</button>
       </div>
-
-      <div class="card">
-        <h3>02 // CAMERA MOOD -> REELS & SONGS</h3>
-        <p style="color:var(--muted); font-size:13px;">Scan your face with your camera to detect your mood and launch matching reels or songs instantly.</p>
-        <button onclick="scanCameraMood()">SCAN MY MOOD NOW</button>
-        <video id="moodVideo" class="cam-preview hidden" autoplay playsinline muted></video>
-        <div id="moodResult" style="margin-top:10px; font-size:14px; color:var(--emerald-bright);"></div>
-      </div>
-    </div>
-
-    <div class="grid">
-      <div class="card">
-        <h3>03 // FILE UPLOAD & AI EDITOR</h3>
-        <input type="file" id="fileUploadInput" onchange="handleFileUpload(event)" />
-        <input type="text" id="fileInstructionInput" placeholder="What should JARVIS edit or fix in this file?" />
-        <button onclick="modifyUploadedFile()">EDIT & DOWNLOAD FILE</button>
-        <pre id="filePreviewBox" style="background:var(--bg); padding:10px; border-radius:8px; max-height:140px; overflow:auto; font-size:12px; color:var(--emerald-bright); margin-top:10px;">No file selected.</pre>
-      </div>
-
-      <div class="card">
-        <h3>04 // LIVE PC & MOBILE COMMAND SYNC</h3>
-        <select id="targetDevice">
-          <option value="windows">Windows PC</option>
-          <option value="android">Android Mobile</option>
-        </select>
-        <input type="text" id="remoteCmdInput" placeholder="e.g., Open Chrome / Create 20s video / Check my mood" />
-        <button onclick="sendRemoteCommand()">SEND TO DEVICE</button>
-        <div id="remoteFeed" style="margin-top:10px;"></div>
-      </div>
-    </div>
-
-    <div id="devTrainerCard" class="card hidden" style="border-color:#f59e0b;">
-      <h3 style="color:#f59e0b;">◈ DEVELOPER AI TRAINER (1-SECOND SKILL LEARNING)</h3>
-      <input type="text" id="devTriggerInput" placeholder="Trigger phrase (what user asks)" />
-      <input type="text" id="devReplyInput" placeholder="JARVIS instant answer" />
-      <input type="text" id="devCodeInput" placeholder="Optional Python action code" />
-      <button style="background:#f59e0b;" onclick="trainDevSkill()">TRAIN & SYNC IN 1 SECOND</button>
+      <div id="authStatus" style="color:#ffb703; font-size:12px; min-height:16px;"></div>
     </div>
   </div>
-</div>
 
-<script>
-  const CLOUD_GATEWAYS = [
-    "https://jarvis-neural-gateway.gattuchowdappa121.workers.dev",
-    "https://jarvis-neural-gateway.gattukushal68.workers.dev",
-    "https://jarvis-neural-gateway-beta.gattukushal68.workers.dev"
-  ];
-  const SUPABASE_URL = "https://eoyftbixuwybuykjgrhr.supabase.co";
-  const SUPABASE_KEY = "sb_publishable_6vpris-KE1NpaguLqvt6zw_l5OnvrsE";
-  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  <div id="mainView" class="app hidden">
+    <div class="stage">
+      <canvas id="coreCanvas" width="320" height="240"></canvas>
+    </div>
+    <div id="chatLog" class="chat"></div>
+    <div class="input-row">
+      <input id="cmdIn" type="text" placeholder="Type a command..." autocomplete="off" />
+    </div>
+  </div>
 
-  let currentAccount = null;
-  let uploadedFileName = "";
-  let uploadedFileContent = "";
+  <script>
+    const CLOUD_GATEWAYS = [
+      "https://jarvis-neural-gateway.gattuchowdappa121.workers.dev",
+      "https://jarvis-neural-gateway.gattukushal68.workers.dev",
+      "https://jarvis-neural-gateway-beta.gattukushal68.workers.dev"
+    ];
+    const SUPABASE_URL = "https://eoyftbixuwybuykjgrhr.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_6vpris-KE1NpaguLqvt6zw_l5OnvrsE";
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  function cleanUsername(raw) { return raw.trim().toLowerCase().replace(/[^a-z0-9._-]/g, ""); }
+    let account = null;
+    let phase = 0;
+    let activePulse = false;
+    let lastBurst = 0;
 
-  async function sha256Hex(str) {
-    const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
-    return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, "0")).join("");
-  }
+    function renderCore(canvasId) {
+      const c = document.getElementById(canvasId);
+      if (!c) return;
+      const ctx = c.getContext("2d");
+      const w = c.width, h = c.height, cx = w / 2, cy = h / 2;
+      ctx.fillStyle = "#000000";
+      ctx.fillRect(0, 0, w, h);
 
-  function init() {
-    const saved = localStorage.getItem("jarvis_account_session");
-    if (saved) {
-      try {
-        currentAccount = JSON.parse(saved);
-        if (currentAccount && currentAccount.id) showDashboard();
-      } catch (e) {}
+      const tilt = 0.42 + 0.14 * Math.sin(phase * 0.75);
+      const baseR = Math.min(w, h) * 0.36;
+      const rings = [
+        { r: baseR, yaw: 0.35, col: "#ffb703" },
+        { r: baseR * 0.78, yaw: -0.55, col: "#f59e0b" },
+        { r: baseR * 0.58, yaw: 0.85, col: "#00f0ff" }
+      ];
+
+      for (const rg of rings) {
+        ctx.beginPath();
+        for (let i = 0; i <= 60; i++) {
+          const a = (i / 60) * Math.PI * 2 + phase * rg.yaw * 2.1;
+          const x3 = rg.r * Math.cos(a);
+          const y3 = rg.r * Math.sin(a) * Math.cos(tilt);
+          const z3 = rg.r * Math.sin(a) * Math.sin(tilt);
+          const p = 260 / (260 - z3 * 0.55);
+          const sx = cx + x3 * p, sy = cy + y3 * p;
+          if (i === 0) ctx.moveTo(sx, sy); else ctx.lineTo(sx, sy);
+        }
+        ctx.strokeStyle = rg.col;
+        ctx.lineWidth = 1.6;
+        ctx.stroke();
+      }
+
+      for (let k = 0; k < 28; k++) {
+        const lon = k * 2.39996 + phase * (0.6 + (k % 4) * 0.22);
+        const lat = ((k * 137.5) % 150 - 75) * Math.PI / 180;
+        const rad = baseR * 0.72;
+        const x3 = rad * Math.cos(lat) * Math.cos(lon);
+        const y3 = rad * Math.sin(lat) * 0.85;
+        const z3 = rad * Math.cos(lat) * Math.sin(lon);
+        const p = 250 / (250 - z3);
+        ctx.fillStyle = k % 3 === 0 ? "#00f0ff" : "#ffd166";
+        ctx.beginPath();
+        ctx.arc(cx + x3 * p, cy + y3 * p, Math.max(1.2, 2.4 * p), 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      const coreR = (activePulse ? 18 : 15) + 3 * Math.sin(phase * 3.2);
+      ctx.beginPath();
+      ctx.arc(cx, cy, coreR, 0, Math.PI * 2);
+      ctx.fillStyle = "#191002";
+      ctx.fill();
+      ctx.strokeStyle = "#ffb703";
+      ctx.lineWidth = 2;
+      ctx.stroke();
     }
-    if (localStorage.getItem("jarvis_dev_mode") === "1") {
-      document.getElementById("devTrainerCard").classList.remove("hidden");
+
+    setInterval(() => {
+      phase += activePulse ? 0.055 : 0.025;
+      renderCore("coreCanvas");
+      renderCore("authCanvas");
+    }, 33);
+
+    function appendMsg(who, text) {
+      const log = document.getElementById("chatLog");
+      const div = document.createElement("div");
+      div.className = "msg";
+      const span = document.createElement("span");
+      span.className = who === "YOU" ? "who-you" : "who-ai";
+      span.textContent = `[${who}] `;
+      div.appendChild(span);
+      div.appendChild(document.createTextNode(text));
+      log.appendChild(div);
+      log.scrollTop = log.scrollHeight;
     }
-  }
 
-  async function signup() {
-    const username = cleanUsername(document.getElementById("usernameInput").value);
-    const password = document.getElementById("passwordInput").value.trim();
-    const msgEl = document.getElementById("authMsg");
-    if (!username || password.length < 4) { msgEl.innerText = "Enter username and password (min 4 chars)."; return; }
-    const password_hash = await sha256Hex(`JARVIS_100L::${username}::${password}`);
-    const { data: existing } = await sb.from("jarvis_accounts").select("id").eq("username", username).maybeSingle();
-    if (existing) { msgEl.innerText = "Username already exists. Click LOGIN."; return; }
-    const { data, error } = await sb.from("jarvis_accounts").insert({ username, password_hash, assistant_name: "JARVIS", active_mode: "GOD" }).select().single();
-    if (error) { msgEl.innerText = error.message; return; }
-    currentAccount = data;
-    localStorage.setItem("jarvis_account_session", JSON.stringify(currentAccount));
-    showDashboard();
-  }
+    function bufToHex(buf) {
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+    }
 
-  async function login() {
-    const username = cleanUsername(document.getElementById("usernameInput").value);
-    const password = document.getElementById("passwordInput").value.trim();
-    const msgEl = document.getElementById("authMsg");
-    if (!username || !password) { msgEl.innerText = "Enter username and password."; return; }
-    const password_hash = await sha256Hex(`JARVIS_100L::${username}::${password}`);
-    const { data, error } = await sb.from("jarvis_accounts").select("*").eq("username", username).eq("password_hash", password_hash).maybeSingle();
-    if (error || !data) { msgEl.innerText = "Invalid username or password."; return; }
-    currentAccount = data;
-    localStorage.setItem("jarvis_account_session", JSON.stringify(currentAccount));
-    showDashboard();
-  }
+    async function derivePbkdf2(password, saltHex = null) {
+      const salt = saltHex
+        ? new Uint8Array(saltHex.match(/.{2}/g).map(h => parseInt(h, 16)))
+        : crypto.getRandomValues(new Uint8Array(16));
+      const keyMat = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveBits"]);
+      const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt, iterations: 120000, hash: "SHA-256" }, keyMat, 256);
+      return `pbkdf2$120000$${bufToHex(salt)}$${bufToHex(bits)}`;
+    }
 
-  function logout() { localStorage.removeItem("jarvis_account_session"); location.reload(); }
+    async function signup() {
+      const username = document.getElementById("userIn").value.trim().toLowerCase().replace(/[^a-z0-9._-]/g, "");
+      const password = document.getElementById("passIn").value.trim();
+      const status = document.getElementById("authStatus");
+      if (username.length < 3 || password.length < 6) { status.textContent = "Username (3+) and password (6+) required."; return; }
+      const password_hash = await derivePbkdf2(password);
+      const { data: ex } = await sb.from("jarvis_accounts").select("id").eq("username", username).maybeSingle();
+      if (ex) { status.textContent = "Account exists. Use LOGIN."; return; }
+      const { data, error } = await sb.from("jarvis_accounts").insert({ username, password_hash, assistant_name: "SOVEREIGN", active_mode: "GOD" }).select().single();
+      if (error) { status.textContent = error.message; return; }
+      account = data;
+      localStorage.setItem("jarvis_account_session", JSON.stringify(account));
+      enterMain();
+    }
 
-  function showDashboard() {
-    document.getElementById("authSection").classList.add("hidden");
-    document.getElementById("dashboardSection").classList.remove("hidden");
-    document.getElementById("logoutBtn").classList.remove("hidden");
-    loadRemoteFeed();
-    setInterval(loadRemoteFeed, 5000);
-  }
+    async function login() {
+      const username = document.getElementById("userIn").value.trim().toLowerCase().replace(/[^a-z0-9._-]/g, "");
+      const password = document.getElementById("passIn").value.trim();
+      const status = document.getElementById("authStatus");
+      if (!username || !password) { status.textContent = "Enter username and password."; return; }
+      const { data } = await sb.from("jarvis_accounts").select("*").eq("username", username).maybeSingle();
+      if (!data || !data.password_hash.startsWith("pbkdf2$")) { status.textContent = "Invalid credentials."; return; }
+      const ok = (await derivePbkdf2(password, data.password_hash.split("$")[2])) === data.password_hash;
+      if (!ok) { status.textContent = "Invalid credentials."; return; }
+      account = data;
+      localStorage.setItem("jarvis_account_session", JSON.stringify(account));
+      enterMain();
+    }
 
-  async function queryMetaBrain(sysPrompt, userPrompt) {
-    const mode = document.getElementById("modelSelect").value;
-    const reqs = [];
-    if (mode === "AUTO" || mode === "CLOUDFLARE") {
-      for (const gw of CLOUD_GATEWAYS) {
-        reqs.push(fetch(`${gw}/think`, {
+    function enterMain() {
+      document.getElementById("authView").classList.add("hidden");
+      document.getElementById("mainView").classList.remove("hidden");
+      appendMsg("SOVEREIGN", "Online.");
+      document.getElementById("cmdIn").focus();
+    }
+
+    async function askAI(sysPrompt, userPrompt) {
+      const dt = Date.now() - lastBurst;
+      if (dt < 1400) await new Promise(r => setTimeout(r, 1400 - dt));
+      lastBurst = Date.now();
+      return await Promise.any([
+        fetch(`https://text.pollinations.ai/${encodeURIComponent(sysPrompt + "\n" + userPrompt)}`).then(async r => { const t = await r.text(); if (!t) throw 0; return t; }),
+        fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ model: "openrouter/free", messages: [{ role: "system", content: sysPrompt }, { role: "user", content: userPrompt }] })
+        }).then(async r => { const d = await r.json(); return d.choices[0].message.content; }),
+        fetch(`${CLOUD_GATEWAYS[0]}/think`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ system_prompt: sysPrompt, user_prompt: userPrompt })
-        }).then(async r => { const d = await r.json(); if (!d.reply) throw 0; return d.reply; }));
+        }).then(async r => { const d = await r.json(); if (!d.reply) throw 0; return d.reply; })
+      ]);
+    }
+
+    document.getElementById("cmdIn").addEventListener("keydown", async (e) => {
+      if (e.key !== "Enter") return;
+      const cmd = e.target.value.trim();
+      if (!cmd) return;
+      e.target.value = "";
+      appendMsg("YOU", cmd);
+
+      if (cmd === "kushi24112010" || cmd === "362025") {
+        appendMsg("SOVEREIGN", "OK");
+        return;
       }
-    }
-    if (mode === "AUTO" || mode === "OPENROUTER") {
-      reqs.push(fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ model: "openrouter/free", messages: [{ role: "system", content: sysPrompt }, { role: "user", content: userPrompt }] })
-      }).then(async r => { const d = await r.json(); return d.choices[0].message.content; }));
-    }
-    return await Promise.any(reqs);
-  }
 
-  async function askCloudAI() {
-    const prompt = document.getElementById("aiPromptInput").value.trim();
-    if (!prompt) return;
-    if (prompt === "kushi24112010") {
-      localStorage.setItem("jarvis_dev_mode", "1");
-      document.getElementById("devTrainerCard").classList.remove("hidden");
-      document.getElementById("aiPromptInput").value = "";
-      alert("OK");
-      return;
-    }
-    if (prompt === "362025") {
-      document.getElementById("aiPromptInput").value = "";
-      alert("OK");
-      return;
-    }
-    const outBox = document.getElementById("aiOutput");
-    outBox.innerText = "Thinking...";
-    try {
-      outBox.innerText = await queryMetaBrain("You are JARVIS, an ultra-fast AI helper for work, studies, coding, and design. Reply in the user's language.", prompt);
-    } catch (e) {
-      outBox.innerText = "Ready for your next request.";
-    }
-  }
-
-  async function buildInstantStudio() {
-    const topic = document.getElementById("aiPromptInput").value.trim() || "Modern App";
-    const outBox = document.getElementById("aiOutput");
-    outBox.innerText = "Building complete HTML5 app/website in seconds...";
-    try {
-      let html = await queryMetaBrain("Return ONLY complete valid single-file HTML5 + CSS3 + JS starting with <!DOCTYPE html>.", `Create a responsive, modern website/app for: ${topic}`);
-      html = html.replace(/```html/gi, "").replace(/```/g, "").trim();
-      const blob = new Blob([html], { type: "text/html;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      window.open(url, "_blank");
-      outBox.innerText = "Website / App opened in a new tab!";
-    } catch (e) {
-      outBox.innerText = "Could not build right now.";
-    }
-  }
-
-  async function scanCameraMood() {
-    const vid = document.getElementById("moodVideo");
-    const resEl = document.getElementById("moodResult");
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      vid.srcObject = stream;
-      vid.classList.remove("hidden");
-      resEl.innerText = "Analyzing facial expression...";
-      setTimeout(() => {
-        const canvas = document.createElement("canvas");
-        canvas.width = 160; canvas.height = 120;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(vid, 0, 0, 160, 120);
-        const data = ctx.getImageData(0, 0, 160, 120).data;
-        let sum = 0;
-        for (let i = 0; i < data.length; i += 4) sum += (data[i] + data[i+1] + data[i+2]) / 3;
-        const avg = sum / (data.length / 4);
-        stream.getTracks().forEach(t => t.stop());
-        vid.classList.add("hidden");
-        const mood = avg > 115 ? "HAPPY & ENERGETIC" : (avg > 75 ? "FOCUSED & CHILL" : "CALM & RELAXED");
-        const q = avg > 115 ? "feel+good+upbeat+songs+and+reels" : (avg > 75 ? "chill+lofi+study+work+music" : "soothing+peaceful+acoustic+songs");
-        resEl.innerText = `Mood: ${mood} — Opening matching songs & reels!`;
-        window.open(`https://www.youtube.com/results?search_query=${q}`, "_blank");
-      }, 1400);
-    } catch (e) {
-      resEl.innerText = "Camera permission needed to scan mood.";
-    }
-  }
-
-  async function generateImage() {
-    const prompt = document.getElementById("aiPromptInput").value.trim();
-    if (!prompt) return;
-    const outBox = document.getElementById("aiOutput");
-    const imgEl = document.getElementById("generatedImg");
-    outBox.innerText = "Generating image...";
-    imgEl.classList.add("hidden");
-    for (const gw of [...CLOUD_GATEWAYS].sort(() => Math.random() - 0.5)) {
+      activePulse = true;
       try {
-        const res = await fetch(`${gw}/imagine`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ prompt }) });
-        if (res.ok) {
-          imgEl.src = URL.createObjectURL(await res.blob());
-          imgEl.classList.remove("hidden");
-          outBox.innerText = "";
+        if (/^(create|make|build|generate)\s+(a\s+|an\s+)?(website|web app|app|3d game|game|design|template|study guide)/i.test(cmd)) {
+          let html = await askAI("Return ONLY valid single-file HTML5 + CSS3 + JS starting with <!DOCTYPE html> with zero external CDNs.", cmd);
+          html = html.replace(/```html/gi, "").replace(/```/g, "").trim();
+          window.open(URL.createObjectURL(new Blob([html], { type: "text/html;charset=utf-8" })), "_blank");
+          appendMsg("SOVEREIGN", "Opened in a new tab.");
           return;
         }
-      } catch (e) {}
-    }
-    outBox.innerText = "Image service busy.";
-  }
+        if (/^(create|make|generate|draw)\s+(a\s+|an\s+)?(image|picture|photo|art|wallpaper)/i.test(cmd)) {
+          for (const gw of [...CLOUD_GATEWAYS].sort(() => Math.random() - 0.5)) {
+            try {
+              const res = await fetch(`${gw}/imagine`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ prompt: cmd }) });
+              if (res.ok) {
+                const url = URL.createObjectURL(await res.blob());
+                window.open(url, "_blank");
+                appendMsg("SOVEREIGN", "Image opened.");
+                return;
+              }
+            } catch (err) {}
+          }
+        }
+        if (account && /^(video|render|open |close |lock |screenshot|mood)/i.test(cmd)) {
+          await sb.from("remote_commands").insert({ user_id: account.id, target_device: "windows", command_text: cmd, status: "pending" });
+          appendMsg("SOVEREIGN", "Queued.");
+          return;
+        }
+        const reply = await askAI("You are Sovereign, a concise and helpful AI assistant. Reply in the user's language.", cmd);
+        appendMsg("SOVEREIGN", reply || "Ready.");
+      } catch (err) {
+        appendMsg("SOVEREIGN", "Ready.");
+      } finally {
+        activePulse = false;
+      }
+    });
 
-  function handleFileUpload(ev) {
-    const file = ev.target.files[0];
-    if (!file) return;
-    uploadedFileName = file.name;
-    const reader = new FileReader();
-    reader.onload = e => { uploadedFileContent = e.target.result; document.getElementById("filePreviewBox").innerText = uploadedFileContent.slice(0, 1200); };
-    reader.readAsText(file);
-  }
-
-  async function modifyUploadedFile() {
-    const instr = document.getElementById("fileInstructionInput").value.trim();
-    if (!uploadedFileContent || !instr) return;
-    const preview = document.getElementById("filePreviewBox");
-    preview.innerText = "Editing file...";
-    let modified = await queryMetaBrain("Return ONLY the updated file content.", `Instruction: ${instr}\nContent:\n${uploadedFileContent.slice(0, 14000)}`);
-    modified = modified.replace(/```[a-z]*\n?/gi, "").replace(/```/g, "").trim();
-    preview.innerText = modified.slice(0, 1200);
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(new Blob([modified], { type: "text/plain;charset=utf-8" }));
-    a.download = `edited_${uploadedFileName}`;
-    a.click();
-  }
-
-  async function trainDevSkill() {
-    const trig = document.getElementById("devTriggerInput").value.trim().toLowerCase();
-    const code = document.getElementById("devCodeInput").value.trim();
-    if (!trig) return;
-    if (code) await sb.from("global_skills").insert({ trigger_phrase: trig, python_action: code });
-    alert("OK — Trained in 1s!");
-  }
-
-  async function sendRemoteCommand(customCmd) {
-    const target_device = document.getElementById("targetDevice").value;
-    const command_text = customCmd || document.getElementById("remoteCmdInput").value.trim();
-    if (!command_text) return;
-    await sb.from("remote_commands").insert({ user_id: currentAccount.id, target_device, command_text, status: "pending" });
-    document.getElementById("remoteCmdInput").value = "";
-    loadRemoteFeed();
-  }
-
-  function triggerRemoteVideo() {
-    const p = document.getElementById("aiPromptInput").value.trim() || "Modern AI Showcase";
-    sendRemoteCommand(`Create a 15 second video of ${p}`);
-  }
-
-  async function loadRemoteFeed() {
-    if (!currentAccount) return;
-    const { data } = await sb.from("remote_commands").select("*").eq("user_id", currentAccount.id).order("created_at", { ascending: false }).limit(5);
-    document.getElementById("remoteFeed").innerHTML = (data || []).map(i => `<div class="log-item"><strong>[${(i.target_device || "WINDOWS").toUpperCase()}]</strong> ${i.command_text} — <span style="color:var(--emerald-bright);">${i.status}</span></div>`).join("");
-  }
-
-  init();
-</script>
+    (() => {
+      try {
+        const saved = JSON.parse(localStorage.getItem("jarvis_account_session") || "null");
+        if (saved && saved.id) { account = saved; enterMain(); }
+      } catch (err) {}
+    })();
+  </script>
 </body>
 </html>
